@@ -2,11 +2,13 @@
 #include "olcPixelGameEngine.h"
 #include "../chess/src/point.h"
 #include "../chess/src/deck.h"
+#include <unordered_map>
 
 class PawnS
 {
 public:
     bool iswhite = true;
+    int NomerPawn = 0;
     olc::Sprite *sprPawn = nullptr;
     olc::Decal *decPawn = nullptr;
     olc::vf2d PwnPos;
@@ -47,7 +49,6 @@ private:
     olc::vf2d temp = {0.0f, 0.0f};
 
     std::vector<PawnS> pawns;
-    std::vector<PawnS> pawns_b;
 
 private:
     chesslogix::Deck chessdeck;
@@ -86,11 +87,12 @@ protected:
     virtual bool OnUserUpdate(float fElapsedTime) override
     {
         Clear(olc::BLANK);
+
         for (int k = 0; k < pawns.size(); k++)
         {
-            if (pawns[k].iswhite)
+            if (pawns[k].iswhite && pawns[k].decPawn != nullptr)
                 DrawDecal(pawns[k].PwnPos, pawns[k].decPawn, {0.05f, 0.05f});
-            else
+            else if (pawns[k].decPawn && pawns[k].decPawn != nullptr)
                 DrawDecal(pawns[k].PwnPos, pawns[k].decPawn, {0.05f, 0.05f}, olc::BLACK);
         }
 
@@ -126,7 +128,19 @@ protected:
             {
                 if (olc::vf2d{((float)vectorOfpoints[i].col * 26.0f - (float)(*pSelected).x), ((float)vectorOfpoints[i].row * 26.0f - (float)(*pSelected).y)}.mag() < 20.0f)
                 {
-                    *pSelected = {float(vectorOfpoints[i].col * 26), (float)(vectorOfpoints[i].row * 26)};
+                    for (int k = 0; k < pawns.size(); k++)
+                    {
+                        if (pawns[k].PwnPos.x == ((float)vectorOfpoints[i].col * 26.0f) && pawns[k].PwnPos.y == ((float)vectorOfpoints[i].row * 26.0f))
+                        {
+                            delete pawns[k].decPawn;
+                            delete pawns[k].sprPawn;
+                            pawns[k].sprPawn = nullptr;
+                            pawns[k].decPawn = nullptr;
+                            pawns.erase(pawns.begin() + k);
+                            break;
+                        }
+                    }
+                    *pSelected = {float(vectorOfpoints[i].col * 26.0f), (float)(vectorOfpoints[i].row * 26.0f)};
                     chessdeck.makeAstep(vectorOfpoints[i]);
                     isItFind = true;
                     break;

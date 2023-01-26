@@ -113,7 +113,7 @@ namespace chesslogix
 
                     while ((c < 8) && (c >= 0) && (r < 8) && (r >= 0))
                     {
-                        if ((points[i].col == c && points[i].row == r) || ((col_ >= 8) || (col_ < 0) || (row_ >= 8) || (row_ < 0)))
+                        if ((i < points.size()) && (points[i].col == c && points[i].row == r) || ((col_ >= 8) || (col_ < 0) || (row_ >= 8) || (row_ < 0)))
                             points.erase(points.begin() + i);
                         else
                             break;
