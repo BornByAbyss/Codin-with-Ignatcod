@@ -30,10 +30,10 @@ namespace chesslogix
 
     public:
         Deck();
-        void makeAstep(Point);
-        void logicOperation(std::string);
+        bool toStep(Point);
+        void logicOperation(Point);
         void clearPoints();
-        std::vector<Point> takeVpoints();
+        std::vector<Point> takePoints();
     };
 }
 

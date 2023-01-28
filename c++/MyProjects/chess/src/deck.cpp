@@ -23,34 +23,36 @@ namespace chesslogix
         kingW.set(true, "KW");
     }
 
-    void Deck::makeAstep(Point endP)
-    {
+    bool Deck::toStep(Point endP)
+    { // 0 - empty  1 - enemy
+        bool isAnyBodyOutThere = false;
+        if (deck[endP.row][endP.col] != empty)
+            isAnyBodyOutThere = true;
         deck[endP.row][endP.col] = deck[begP.row][begP.col];
         deck[begP.row][begP.col] = empty;
+        return isAnyBodyOutThere;
     }
 
-    void Deck::logicOperation(std::string currentPos)
+    void Deck::logicOperation(Point initialPoint)
     {
         Point step{0, 0, 0};
         bool last = false;
         int col_, row_;
         int c, r;
-        int column = currentPos[0] - 'a'; //
-        int row = '8' - currentPos[1];    //      deck notation into massive notation
-                                          //      deck notation into massive notation
 
-        begP.col = column;
-        begP.row = row;
+        begP.col = initialPoint.col;
+        begP.row = initialPoint.row;
         begP.isAttack = false;
 
-        Figures *elem = deck[row][column];
+        Figures *elem = deck[initialPoint.row][initialPoint.col];
+
         if (elem != empty)
         {
-            elem->move(row, column, points); //      take all possible points of figures
+            elem->move(initialPoint.row, initialPoint.col, points); //      take all possible points of figures
             for (int i = 0; i < points.size(); ++i)
             {
                 col_ = points[i].col;
-                row_ = points[i].row;
+                row_ = points[i].row; // take column and row fo everu point
 
                 if ((col_ >= 8) || (col_ < 0) || (row_ >= 8) || (row_ < 0))
                 { /*Check for range*/
@@ -62,14 +64,14 @@ namespace chesslogix
                 if ((points[i].isAttack) && (deck[row_][col_] != empty) && (deck[row_][col_]->showColor() != elem->showColor()))
                 {
                     /*if isAttack and we have an enemy*/
-                    if (col_ != 0)
-                        step.col = ((col_ - column) / abs(col_ - column));
-                    if (row_ != 0)
-                        step.row = ((row_ - row) / abs(row_ - row));
+                    if ((col_ - initialPoint.col) != 0)
+                        step.col = ((col_ - initialPoint.col) / abs(col_ - initialPoint.col));
+                    if ((row_ - initialPoint.row) != 0)
+                        step.row = ((row_ - initialPoint.row) / abs(row_ - initialPoint.row));
 
                     c = col_;
                     r = row_;
-                    while ((c < 8) && (c >= 0) && (r < 8) && (r >= 0))
+                    while (true)
                     {
                         c += step.col;
                         r += step.row;
@@ -83,7 +85,7 @@ namespace chesslogix
                             break;
                         }
 
-                        if ((points[i].col == c && points[i].row == r) || ((col_ >= 8) || (col_ < 0) || (row_ >= 8) || (row_ < 0)))
+                        if ((i >= 0) && (i < points.size()) && (points[i].col == c && points[i].row == r) || ((col_ >= 8) || (col_ < 0) || (row_ >= 8) || (row_ < 0)))
                             points.erase(points.begin() + i);
                         else
                             break;
@@ -103,17 +105,17 @@ namespace chesslogix
                 // i suppose it can work for Knight too
                 if (deck[row_][col_] != empty)
                 {
-                    if (col_ != 0)
-                        step.col = ((col_ - column) / abs(col_ - column));
-                    if (row_ != 0)
-                        step.row = ((row_ - row) / abs(row_ - row));
+                    if ((col_ - initialPoint.col) != 0)
+                        step.col = ((col_ - initialPoint.col) / abs(col_ - initialPoint.col));
+                    if ((row_ - initialPoint.row) != 0)
+                        step.row = ((row_ - initialPoint.row) / abs(row_ - initialPoint.row));
 
                     c = col_;
                     r = row_;
 
-                    while ((c < 8) && (c >= 0) && (r < 8) && (r >= 0))
+                    while (true)
                     {
-                        if ((i < points.size()) && (points[i].col == c && points[i].row == r) || ((col_ >= 8) || (col_ < 0) || (row_ >= 8) || (row_ < 0)))
+                        if ((i >= 0) && (i < points.size()) && ((points[i].col == c && points[i].row == r) || ((col_ >= 8) || (col_ < 0) || (row_ >= 8) || (row_ < 0))))
                             points.erase(points.begin() + i);
                         else
                             break;
@@ -131,7 +133,7 @@ namespace chesslogix
         points.clear();
     }
 
-    std::vector<Point> Deck::takeVpoints()
+    std::vector<Point> Deck::takePoints()
     {
         return points;
     }

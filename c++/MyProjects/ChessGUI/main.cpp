@@ -2,30 +2,23 @@
 #include "olcPixelGameEngine.h"
 #include "../chess/src/point.h"
 #include "../chess/src/deck.h"
-#include <unordered_map>
 
 class PawnS
 {
 public:
     bool iswhite = true;
     int NomerPawn = 0;
-    olc::Sprite *sprPawn = nullptr;
-    olc::Decal *decPawn = nullptr;
     olc::vf2d PwnPos;
 
 public:
     PawnS(float x, float y)
     {
-        sprPawn = new olc::Sprite("./images/pawn.png");
-        decPawn = new olc::Decal(sprPawn);
         PwnPos.x = x;
         PwnPos.y = y;
     }
 
     PawnS(float x, float y, bool bl)
     {
-        sprPawn = new olc::Sprite("./images/pawn.png");
-        decPawn = new olc::Decal(sprPawn);
         PwnPos.x = x;
         PwnPos.y = y;
         iswhite = bl;
@@ -43,20 +36,26 @@ public:
     olc::Sprite *sprDeck = nullptr;
 
     int nLayerBackground = 0;
+    int tempIndex = -1;
 
 private:
     olc::vf2d *pSelected = nullptr;
     olc::vf2d temp = {0.0f, 0.0f};
-
     std::vector<PawnS> pawns;
 
 private:
+    olc::Sprite *sprPawnBlack = nullptr;
+    olc::Sprite *sprPawnWhite = nullptr;
+
+    olc::Decal *decPawnBlack = nullptr;
+    olc::Decal *decPawnWhite = nullptr;
+
+private:
     chesslogix::Deck chessdeck;
-    char ch;
-    bool isItFind = false;
-    bool isItAwesomeMydear = false;
-    std::string currentPos = "";
-    std::vector<chesslogix::Point> vectorOfpoints;
+    chesslogix::Point initialPoint;
+    bool isFind = false;
+
+    std::vector<chesslogix::Point> vectorOfPoints;
 
 protected:
     virtual bool OnUserCreate() override
@@ -64,10 +63,16 @@ protected:
 
         sprDeck = new olc::Sprite("./images/deck.png");
 
-        for (float l = 0.0f; l <= 182.0f; l += 26.0f)
+        sprPawnWhite = new olc::Sprite("./images/pawn.png");
+        sprPawnBlack = new olc::Sprite("./images/pawnBlack.png");
+
+        decPawnWhite = new olc::Decal(sprPawnWhite);
+        decPawnBlack = new olc::Decal(sprPawnBlack);
+
+        for (float l = 0.0f; l <= 560.0f; l += 80.0f)
         {
-            pawns.push_back(PawnS(l, 156.0f));
-            pawns.push_back(PawnS(l, 26.0f, false));
+            pawns.push_back(PawnS(l, 480.0f));
+            pawns.push_back(PawnS(l, 80.0f, false));
         }
 
         nLayerBackground = CreateLayer();
@@ -77,7 +82,6 @@ protected:
         SetPixelMode(olc::Pixel::ALPHA);
         DrawSprite({0, 0}, sprDeck, 1);
         SetPixelMode(olc::Pixel::NORMAL);
-
         EnableLayer(nLayerBackground, true);
         SetDrawTarget(nullptr);
 
@@ -90,10 +94,33 @@ protected:
 
         for (int k = 0; k < pawns.size(); k++)
         {
-            if (pawns[k].iswhite && pawns[k].decPawn != nullptr)
-                DrawDecal(pawns[k].PwnPos, pawns[k].decPawn, {0.05f, 0.05f});
-            else if (pawns[k].decPawn && pawns[k].decPawn != nullptr)
-                DrawDecal(pawns[k].PwnPos, pawns[k].decPawn, {0.05f, 0.05f}, olc::BLACK);
+            if (pawns[k].iswhite)
+            {
+                if (pSelected == &pawns[k].PwnPos)
+                {
+                    tempIndex = k;
+                    continue;
+                }
+                DrawDecal(pawns[k].PwnPos, decPawnWhite);
+            }
+            else
+            {
+                if (pSelected == &pawns[k].PwnPos)
+                {
+                    tempIndex = k;
+                    continue;
+                }
+                DrawDecal(pawns[k].PwnPos, decPawnBlack);
+            }
+        }
+        if (tempIndex >= 0)
+        {
+            if (pawns[tempIndex].iswhite)
+                DrawDecal(pawns[tempIndex].PwnPos, decPawnWhite);
+            else
+                DrawDecal(pawns[tempIndex].PwnPos, decPawnBlack);
+
+            tempIndex = -1;
         }
 
         olc::vf2d mouse = {float(GetMouseX()), float(GetMouseY())};
@@ -103,64 +130,57 @@ protected:
             pSelected = nullptr;
 
             for (int k = 0; k < pawns.size(); k++)
-                if (((pawns[k].PwnPos - mouse).mag() < 20.0f))
+                if (((mouse.x > pawns[k].PwnPos.x) && (mouse.x < (pawns[k].PwnPos.x + 80.0f))) && ((mouse.y > pawns[k].PwnPos.y) && (mouse.y < (pawns[k].PwnPos.y + 80.0f))))
                 {
-                    isItAwesomeMydear = true;
                     pSelected = &pawns[k].PwnPos;
+                    temp = pawns[k].PwnPos;
+                    initialPoint = {((int)pawns[k].PwnPos.y / 80), ((int)pawns[k].PwnPos.x / 80), true};
 
-                    ch = 'a';
-                    temp = *pSelected;
-                    ch += (int)(pawns[k].PwnPos.x / 26.0f);
-                    currentPos = ch;
-                    currentPos += ('0' + (int)((208.0f - pawns[k].PwnPos.y) / 26));
-
-                    chessdeck.logicOperation(currentPos);
-                    vectorOfpoints = chessdeck.takeVpoints();
+                    chessdeck.logicOperation(initialPoint);
+                    vectorOfPoints = chessdeck.takePoints();
                     chessdeck.clearPoints();
-                    currentPos = "";
                     break;
                 }
         }
 
-        if (GetMouse(0).bReleased && isItAwesomeMydear)
+        if (GetMouse(0).bReleased && pSelected != nullptr)
         {
-            for (unsigned i = 0; i < vectorOfpoints.size(); i++)
+            for (int k = 0; k < vectorOfPoints.size(); k++)
             {
-                if (olc::vf2d{((float)vectorOfpoints[i].col * 26.0f - (float)(*pSelected).x), ((float)vectorOfpoints[i].row * 26.0f - (float)(*pSelected).y)}.mag() < 20.0f)
+                if (((mouse.x > (float)vectorOfPoints[k].col * 80.0f) && (mouse.x < ((float)vectorOfPoints[k].col * 80.0f + 80.0f))) && ((mouse.y > (float)vectorOfPoints[k].row * 80.0f) && (mouse.y < ((float)vectorOfPoints[k].row * 80.0f + 80.0f))))
                 {
-                    for (int k = 0; k < pawns.size(); k++)
+                    if (chessdeck.toStep(chesslogix::Point{vectorOfPoints[k].row, vectorOfPoints[k].col}))
                     {
-                        if (pawns[k].PwnPos.x == ((float)vectorOfpoints[i].col * 26.0f) && pawns[k].PwnPos.y == ((float)vectorOfpoints[i].row * 26.0f))
+                        for (int i = 0; i < pawns.size(); i++)
                         {
-                            delete pawns[k].decPawn;
-                            delete pawns[k].sprPawn;
-                            pawns[k].sprPawn = nullptr;
-                            pawns[k].decPawn = nullptr;
-                            pawns.erase(pawns.begin() + k);
-                            break;
+                            if (((float)vectorOfPoints[k].col * 80.0f == pawns[i].PwnPos.x) && ((float)vectorOfPoints[k].row * 80.0f == pawns[i].PwnPos.y))
+                            {
+                                pawns.erase(pawns.begin() + i);
+
+                                break;
+                            }
                         }
                     }
-                    *pSelected = {float(vectorOfpoints[i].col * 26.0f), (float)(vectorOfpoints[i].row * 26.0f)};
-                    chessdeck.makeAstep(vectorOfpoints[i]);
-                    isItFind = true;
+                    *pSelected = {(float)vectorOfPoints[k].col * 80.0f, (float)vectorOfPoints[k].row * 80.0f};
+                    isFind = true;
                     break;
                 }
             }
-            if (!isItFind)
-            {
+            if (!isFind)
                 *pSelected = temp;
-            }
-            isItAwesomeMydear = false;
-            isItFind = false;
+
+            isFind = false;
             pSelected = nullptr;
         }
+
         if (pSelected != nullptr)
         {
-            for (unsigned i = 0; i < vectorOfpoints.size(); i++)
+            for (unsigned i = 0; i < vectorOfPoints.size(); i++)
             {
-                DrawCircle({((vectorOfpoints[i].col * 26) + 13), ((vectorOfpoints[i].row * 26) + 13)}, 5, olc::RED);
+                DrawRect(vectorOfPoints[i].col * 80 + 2, vectorOfPoints[i].row * 80 + 2, 75, 75, olc::VERY_DARK_CYAN);
+                DrawRect(vectorOfPoints[i].col * 80 + 3, vectorOfPoints[i].row * 80 + 3, 73, 73, olc::CYAN);
             }
-            *pSelected = (mouse - olc::vf2d{13.0f, 13.0f});
+            *pSelected = (mouse - olc::vf2d{40.0f, 40.0f});
         }
 
         return true;
@@ -170,7 +190,7 @@ protected:
 int main()
 {
     ChessG demo;
-    if (demo.Construct(208, 208, 1, 1))
+    if (demo.Construct(640, 640, 1, 1)) // 80 - size of square
         demo.Start();
     return 0;
 }
