@@ -17,6 +17,14 @@ struct Point
         Point tempPoint = {(row += rod.row), (col += rod.col)};
         return tempPoint;
     }
+
+    bool operator==(Point &rod)
+    {
+        if ((row == rod.row) && (col == rod.col))
+            return 1;
+        else
+            return 0;
+    }
 };
 
 #endif

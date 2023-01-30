@@ -9,23 +9,26 @@
 ChessGame::ChessGame()
 {
     sAppName = "Chess";
-    pawnW1.set(true, "pB", 0.0f, 480.0);
-    pawnW2.set(true, "pB", 80.0f, 480.0);
-    pawnW3.set(true, "pB", 160.0f, 480.0);
-    pawnW4.set(true, "pB", 240.0f, 480.0);
-    pawnW5.set(true, "pB", 320.0f, 480.0);
-    pawnW6.set(true, "pB", 400.0f, 480.0);
-    pawnW7.set(true, "pB", 480.0f, 480.0);
-    pawnW8.set(true, "pB", 560.0f, 480.0);
+    pawnW1.set(true, "pawn", 0.0f, 480.0);
+    pawnW2.set(true, "pawn", 80.0f, 480.0);
+    pawnW3.set(true, "pawn", 160.0f, 480.0);
+    pawnW4.set(true, "pawn", 240.0f, 480.0);
+    pawnW5.set(true, "pawn", 320.0f, 480.0);
+    pawnW6.set(true, "pawn", 400.0f, 480.0);
+    pawnW7.set(true, "pawn", 480.0f, 480.0);
+    pawnW8.set(true, "pawn", 560.0f, 480.0);
 
-    pawnB1.set(false, "pB", 0.0f, 80.0);
-    pawnB2.set(false, "pB", 80.0f, 80.0);
-    pawnB3.set(false, "pB", 160.0f, 80.0);
-    pawnB4.set(false, "pB", 240.0f, 80.0);
-    pawnB5.set(false, "pB", 320.0f, 80.0);
-    pawnB6.set(false, "pB", 400.0f, 80.0);
-    pawnB7.set(false, "pB", 480.0f, 80.0);
-    pawnB8.set(false, "pB", 560.0f, 80.0);
+    pawnB1.set(false, "pawn", 0.0f, 80.0);
+    pawnB2.set(false, "pawn", 80.0f, 80.0);
+    pawnB3.set(false, "pawn", 160.0f, 80.0);
+    pawnB4.set(false, "pawn", 240.0f, 80.0);
+    pawnB5.set(false, "pawn", 320.0f, 80.0);
+    pawnB6.set(false, "pawn", 400.0f, 80.0);
+    pawnB7.set(false, "pawn", 480.0f, 80.0);
+    pawnB8.set(false, "pawn", 560.0f, 80.0);
+
+    queenB.set(false, "queen", 240.0f, 0.0f);
+    queenW.set(true, "queen", 240.0f, 560.0f);
 }
 
 bool ChessGame::toStep(Point endP)
@@ -40,10 +43,10 @@ bool ChessGame::toStep(Point endP)
 
 void ChessGame::logicOperation(Point initialPoint)
 {
-    Point step{0, 0, 0};
-    bool last = false;
-    int col_, row_;
-    int c, r;
+    Point step{0, 0, false};
+    Point tempPoint{0, 0, true};
+
+    bool isFirst = true;
 
     begP.col = initialPoint.col;
     begP.row = initialPoint.row;
@@ -51,84 +54,50 @@ void ChessGame::logicOperation(Point initialPoint)
 
     Figures *elem = deck[initialPoint.row][initialPoint.col];
 
-    if (elem != empty)
+    elem->move(initialPoint.row, initialPoint.col, points); //      take all possible points of figures
+
+    for (int i = 0; i < points.size(); i++)
     {
-        elem->move(initialPoint.row, initialPoint.col, points); //      take all possible points of figures
-        for (int i = 0; i < points.size(); ++i)
+        if ((deck[points[i].row][points[i].col] == empty || (elem->showColor() == deck[points[i].row][points[i].col]->showColor())) && elem->showType() == "pawn" && points[i].isAttack)
         {
-            col_ = points[i].col;
-            row_ = points[i].row; // take column and row fo everu point
+            points.erase(points.begin() + i);
+            --i;
+            continue;
+        }
+        else if (deck[points[i].row][points[i].col] != empty && ((elem->showType() == "pawn" && !points[i].isAttack) || (elem->showType() != "pawn" && points[i].isAttack))) // пешка не атакует  и цвет совпадает
+        {
+            if ((points[i].row - initialPoint.row) != 0)
+                step.row = ((points[i].row - initialPoint.row) / abs((points[i].row - initialPoint.row)));
+            if ((points[i].col - initialPoint.col) != 0)
+                step.col = ((points[i].col - initialPoint.col) / abs((points[i].col - initialPoint.col)));
 
-            if ((col_ >= 8) || (col_ < 0) || (row_ >= 8) || (row_ < 0))
-            { /*Check for range*/
-                points.erase(points.begin() + i);
-                --i;
-                continue;
-            }
+            tempPoint = (initialPoint + step);
 
-            if ((points[i].isAttack) && (deck[row_][col_] != empty) && (deck[row_][col_]->showColor() != elem->showColor()))
+            while (true)
             {
-                /*if isAttack and we have an enemy*/
-                if ((col_ - initialPoint.col) != 0)
-                    step.col = ((col_ - initialPoint.col) / abs(col_ - initialPoint.col));
-                if ((row_ - initialPoint.row) != 0)
-                    step.row = ((row_ - initialPoint.row) / abs(row_ - initialPoint.row));
-
-                c = col_;
-                r = row_;
-                while (true)
+                if ((i >= 0) && (i < points.size()) && elem->showColor() == deck[points[i].row][points[i].col]->showColor() && isFirst)
                 {
-                    c += step.col;
-                    r += step.row;
-                    if (i < (points.size() - 1))
-                    {
-                        ++i;
-                    }
-                    else
-                    {
-                        last = true;
+                    points.erase(points.begin() + i);
+                    if (i >= points.size())
                         break;
-                    }
 
-                    if ((i >= 0) && (i < points.size()) && (points[i].col == c && points[i].row == r) || ((col_ >= 8) || (col_ < 0) || (row_ >= 8) || (row_ < 0)))
-                        points.erase(points.begin() + i);
-                    else
-                        break;
+                    tempPoint += step;
+                    isFirst = false;
                 }
-                if (!last)
-                    --i;
-                continue;
-            }
-            else if ((points[i].isAttack) && (deck[row_][col_] == empty) && ('p' == elem->showType()[0]))
-            {
-                points.erase(points.begin() + i); // special for pawn and empty space
-                --i;
-                continue;
-            }
 
-            // if isAttack = true or false and the same colors
-            // i suppose it can work for Knight too
-            if (deck[row_][col_] != empty)
-            {
-                if ((col_ - initialPoint.col) != 0)
-                    step.col = ((col_ - initialPoint.col) / abs(col_ - initialPoint.col));
-                if ((row_ - initialPoint.row) != 0)
-                    step.row = ((row_ - initialPoint.row) / abs(row_ - initialPoint.row));
-
-                c = col_;
-                r = row_;
-
-                while (true)
+                if ((i >= 0) && (i < points.size()) && (tempPoint == points[i]))
                 {
-                    if ((i >= 0) && (i < points.size()) && ((points[i].col == c && points[i].row == r) || ((col_ >= 8) || (col_ < 0) || (row_ >= 8) || (row_ < 0))))
-                        points.erase(points.begin() + i);
-                    else
+                    points.erase(points.begin() + i);
+                    if (i >= points.size())
                         break;
-                    c += step.col;
-                    r += step.row;
+                    tempPoint += step;
                 }
-                --i;
             }
+            isFirst = true;
+
+            --i;
+            // if (elem->showColor() == deck[points[i].row][points[i].col]->showColor()
+            // if (elem->showColor() != deck[points[i].row][points[i].col]->showColor()
         }
     }
 }
@@ -137,9 +106,12 @@ bool ChessGame::OnUserCreate()
 {
     sprDeck = new olc::Sprite("./images/deck.png");
 
-    sprPawnWhite = new olc::Sprite("./images/pawn.png");
+    sprPawnWhite = new olc::Sprite("./images/pawnWhite.png");
     sprPawnBlack = new olc::Sprite("./images/pawnBlack.png");
 
+    sprQueenWhite = new olc::Sprite("./images/queenWhite.png");
+
+    decQueenWhite = new olc::Decal(sprQueenWhite);
     decPawnWhite = new olc::Decal(sprPawnWhite);
     decPawnBlack = new olc::Decal(sprPawnBlack);
 
@@ -164,7 +136,7 @@ bool ChessGame::OnUserUpdate(float fElapsedTime)
     {
         for (int j = 0; j < 8; j++)
         {
-            if ((deck[i][j] != empty) && deck[i][j]->showColor()) // ret 1 if white else black 0
+            if (deck[i][j] != empty && deck[i][j]->showType() == "pawn" && deck[i][j]->showColor()) // ret 1 if white else black 0
             {
                 if (pSelected == &(deck[i][j]->olcPos))
                 {
@@ -172,10 +144,10 @@ bool ChessGame::OnUserUpdate(float fElapsedTime)
                     jTempIndex = j;
                     continue;
                 }
-                
+
                 DrawDecal(deck[i][j]->olcPos, decPawnWhite);
             }
-            else if (deck[i][j] != empty)
+            else if (deck[i][j] != empty && deck[i][j]->showType() == "pawn")
             {
                 if (pSelected == &(deck[i][j]->olcPos))
                 {
@@ -185,14 +157,26 @@ bool ChessGame::OnUserUpdate(float fElapsedTime)
                 }
                 DrawDecal(deck[i][j]->olcPos, decPawnBlack);
             }
+            else if (deck[i][j] != empty && deck[i][j]->showType() == "queen" && deck[i][j]->showColor())
+            {
+                if (pSelected == &(deck[i][j]->olcPos))
+                {
+                    iTempIndex = i;
+                    jTempIndex = j;
+                    continue;
+                }
+                DrawDecal(deck[i][j]->olcPos, decQueenWhite);
+            }
         }
     }
     if ((iTempIndex >= 0) && (jTempIndex >= 0))
     {
-        if (deck[iTempIndex][jTempIndex]->showColor())
+        if (deck[iTempIndex][jTempIndex]->showType() == "pawn" && deck[iTempIndex][jTempIndex]->showColor())
             DrawDecal(deck[iTempIndex][jTempIndex]->olcPos, decPawnWhite);
-        else
+        else if (deck[iTempIndex][jTempIndex]->showType() == "pawn")
             DrawDecal(deck[iTempIndex][jTempIndex]->olcPos, decPawnBlack);
+        else if (deck[iTempIndex][jTempIndex]->showType() == "queen" && deck[iTempIndex][jTempIndex]->showColor())
+            DrawDecal(deck[iTempIndex][jTempIndex]->olcPos, decQueenWhite);
 
         iTempIndex = -1;
         jTempIndex = -1;
@@ -262,8 +246,8 @@ bool ChessGame::OnUserUpdate(float fElapsedTime)
     {
         for (unsigned i = 0; i < points.size(); i++)
         {
-            DrawRect(points[i].col * 80 + 2, points[i].row * 80 + 2, 75, 75, olc::VERY_DARK_CYAN);
-            DrawRect(points[i].col * 80 + 3, points[i].row * 80 + 3, 73, 73, olc::CYAN);
+            DrawRect(points[i].col * 80 + 2, points[i].row * 80 + 2, 75, 75, olc::VERY_DARK_GREEN);
+            DrawRect(points[i].col * 80 + 3, points[i].row * 80 + 3, 73, 73, olc::GREEN);
         }
         *pSelected = (mouse - olc::vf2d{40.0f, 40.0f});
     }
