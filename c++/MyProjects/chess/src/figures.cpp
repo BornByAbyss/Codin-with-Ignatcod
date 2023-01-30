@@ -4,9 +4,9 @@
 #include "figures.h"
 #include "olcPixelGameEngine.h"
 
-
 void Figures::set(bool bl, std::string str, float x, float y)
 {
+    //    pawnW1.set(true, "pB", 0.0f, 480.0);
     olcPos.x = x;
     olcPos.y = y;
     isWhite = bl;
@@ -21,105 +21,23 @@ std::string Figures::showType() const
     return type;
 }
 
-std::ostream &operator<<(std::ostream &out, Figures &fig)
-{
-    out << fig.type;
-    return out;
-}
-
 void Pawn::move(int c1, int c2, std::vector<Point> &points)
 {
-    Point point;
-    Point point2;
-    Point point3A;
-    Point point4A;
-    Point point5A;
-    Point point6A;
-    if (c1 == 6 && isWhite)
-    {
-        point.row = c1 - 1;
-        point.col = c2;
-        point.isAttack = (false);
-        point2.row = c1 - 2;
-        point2.col = c2;
-        point2.isAttack = (false);
-        points.push_back(point);
-        points.push_back(point2);
-    }
-    else if (c1 == 1 && !isWhite)
-    {
-        point.row = c1 + 1;
-        point.col = c2;
-        point.isAttack = (false);
-        point2.row = c1 + 2;
-        point2.col = c2;
-        point2.isAttack = (false);
-        points.push_back(point);
-        points.push_back(point2);
-    }
-    else if (c1 != 1 && !isWhite)
-    {
-        point.row = c1 + 1;
-        point.col = c2;
-        point.isAttack = (false);
-        points.push_back(point);
-    }
-    else if (c1 != 6 && isWhite)
-    {
-        point.row = c1 - 1;
-        point.col = c2;
-        point.isAttack = (false);
-        points.push_back(point);
-    }
+    Point tempPoint = {c1, c2};
     if (isWhite)
-    {
+        points = {{-1, -1, true}, {-1, 1, true}, {-1, 0, false}};
 
-        point3A.row = c1 - 1;
-        point3A.col = c2 - 1;
-        point4A.row = c1 - 1;
-        point4A.col = c2 + 1;
-        point3A.isAttack = (true);
-        point4A.isAttack = (true);
-        points.push_back(point3A);
-        points.push_back(point4A);
-    }
     if (!isWhite)
-    {
-        Point point4A;
-        point5A.row = c1 + 1;
-        point5A.col = c2 + 1;
-        point5A.isAttack = (true);
-        points.push_back(point5A);
-        point6A.row = c1 + 1;
-        point6A.col = c2 - 1;
-        point6A.isAttack = (true);
-        points.push_back(point6A);
-    }
-    else if (c1 == 1 && !isWhite)
-    {
-        point.row = c1 + 1;
-        point.col = c2;
-        point.isAttack = (false);
-        point2.row = c1 + 2;
-        point2.col = c2;
-        point2.isAttack = (false);
-        points.push_back(point);
-        points.push_back(point2);
-    }
-    else if (c1 != 1 && !isWhite)
-    {
-        point.row = c1 + 1;
-        point.col = c2;
-        point.isAttack = (false);
-        points.push_back(point);
-    }
-    else if (c1 != 6 && isWhite)
-    {
-        point.row = c1 - 1;
-        point.col = c2;
-        point.isAttack = (false);
-        points.push_back(point);
-    }
+        points = {{1, 1, true}, {1, -1, true}, {1, 0, false}};
+
+    for (int i = 0; i < points.size(); i++)
+        points[i] += tempPoint;
+
+    if (isWhite && (c1 == 6))
+        points.push_back(Point{-2, 0, false} + tempPoint);
+
+    if (!isWhite && (c1 == 1))
+        points.push_back(Point{2, 0, false} + tempPoint);
 }
 void Rook::move(int c1, int c2, std::vector<Point> &points)
 {
