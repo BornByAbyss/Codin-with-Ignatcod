@@ -9,12 +9,12 @@ struct Point
 
     Point operator+(Point &pot)
     {
-        Point tempPoint = {(row + pot.row), (col + pot.col)};
+        Point tempPoint = {(row + pot.row), (col + pot.col), isAttack};
         return tempPoint;
     }
     Point operator+=(Point &rod)
     {
-        Point tempPoint = {(row += rod.row), (col += rod.col)};
+        Point tempPoint = {(row += rod.row), (col += rod.col), isAttack};
         return tempPoint;
     }
 

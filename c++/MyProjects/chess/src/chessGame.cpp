@@ -46,8 +46,6 @@ void ChessGame::logicOperation(Point initialPoint)
     Point step{0, 0, false};
     Point tempPoint{0, 0, true};
 
-    bool isFirst = true;
-
     begP.col = initialPoint.col;
     begP.row = initialPoint.row;
     begP.isAttack = false;
@@ -58,46 +56,33 @@ void ChessGame::logicOperation(Point initialPoint)
 
     for (int i = 0; i < points.size(); i++)
     {
-        if ((deck[points[i].row][points[i].col] == empty || (elem->showColor() == deck[points[i].row][points[i].col]->showColor())) && elem->showType() == "pawn" && points[i].isAttack)
+        if (elem->showType() == "pawn" && points[i].isAttack && (deck[points[i].row][points[i].col] == empty || ((deck[points[i].row][points[i].col] != empty) && (elem->showColor() == deck[points[i].row][points[i].col]->showColor()))))
         {
             points.erase(points.begin() + i);
             --i;
             continue;
         }
-        else if (deck[points[i].row][points[i].col] != empty && ((elem->showType() == "pawn" && !points[i].isAttack) || (elem->showType() != "pawn" && points[i].isAttack))) // пешка не атакует  и цвет совпадает
+        else if (deck[points[i].row][points[i].col] != empty && ((elem->showType() == "pawn" && !points[i].isAttack) || (elem->showType() != "pawn" && points[i].isAttack))) 
         {
             if ((points[i].row - initialPoint.row) != 0)
-                step.row = ((points[i].row - initialPoint.row) / abs((points[i].row - initialPoint.row)));
+                step.row = ((points[i].row - initialPoint.row) / abs(points[i].row - initialPoint.row));
             if ((points[i].col - initialPoint.col) != 0)
-                step.col = ((points[i].col - initialPoint.col) / abs((points[i].col - initialPoint.col)));
+                step.col = ((points[i].col - initialPoint.col) / abs(points[i].col - initialPoint.col));
 
-            tempPoint = (initialPoint + step);
+            tempPoint = points[i];
 
-            while (true)
+            if (elem->showColor() != deck[points[i].row][points[i].col]->showColor() && elem->showType() != "pawn")
             {
-                if ((i >= 0) && (i < points.size()) && elem->showColor() == deck[points[i].row][points[i].col]->showColor() && isFirst)
-                {
-                    points.erase(points.begin() + i);
-                    if (i >= points.size())
-                        break;
-
-                    tempPoint += step;
-                    isFirst = false;
-                }
-
-                if ((i >= 0) && (i < points.size()) && (tempPoint == points[i]))
-                {
-                    points.erase(points.begin() + i);
-                    if (i >= points.size())
-                        break;
-                    tempPoint += step;
-                }
+                tempPoint += step;
+                i++;
             }
-            isFirst = true;
-
-            --i;
-            // if (elem->showColor() == deck[points[i].row][points[i].col]->showColor()
-            // if (elem->showColor() != deck[points[i].row][points[i].col]->showColor()
+            while ((i < points.size()) && (tempPoint == points[i]))
+            {
+                points.erase(points.begin() + i);
+                tempPoint += step;
+            }
+            step = {0, 0, true};
+            i--;
         }
     }
 }
