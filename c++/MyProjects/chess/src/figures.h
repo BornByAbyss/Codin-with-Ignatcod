@@ -19,7 +19,6 @@ public:
 public:
     bool showColor() const;
     std::string showType() const;
-    friend std::ostream &operator<<(std::ostream &, Figures &);
     virtual void move(int, int, std::vector<Point> &) = 0;
 };
 

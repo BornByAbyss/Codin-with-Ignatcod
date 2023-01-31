@@ -6,7 +6,6 @@
 
 void Figures::set(bool bl, std::string str, float x, float y)
 {
-    //    pawnW1.set(true, "pB", 0.0f, 480.0);
     olcPos.x = x;
     olcPos.y = y;
     isWhite = bl;

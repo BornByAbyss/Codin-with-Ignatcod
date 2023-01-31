@@ -9,7 +9,6 @@
 class ChessGame : public olc::PixelGameEngine
 {
 public:
-    olc::Sprite *sprDeck = nullptr;
     int nLayerBackground = 0;
     int iTempIndex = -1;
     int jTempIndex = -1;
@@ -19,6 +18,8 @@ private:
     olc::vf2d temp = {0.0f, 0.0f};
 
 private:
+    olc::Sprite *sprDeck = nullptr;
+
     olc::Sprite *sprPawnBlack = nullptr;
     olc::Sprite *sprPawnWhite = nullptr;
 
@@ -27,18 +28,18 @@ private:
 
     olc::Decal *decQueenBlack = nullptr;
     olc::Decal *decQueenWhite = nullptr;
-
+    
     olc::Decal *decPawnBlack = nullptr;
     olc::Decal *decPawnWhite = nullptr;
 
 private:
-    Point initialPoint;
-    bool isFind = false;
-    bool notFound = true;
     std::vector<Point> points; //     massive of all possible steps include deck position
+    Point initialPoint;
+    Point begP;
+    bool notFound = true;
+    bool isFind = false;
 
 private:
-    Point begP;
     Pawn pawnB1, pawnB2, pawnB3, pawnB4, pawnB5, pawnB6, pawnB7, pawnB8;
     Pawn pawnW1, pawnW2, pawnW3, pawnW4, pawnW5, pawnW6, pawnW7, pawnW8;
 

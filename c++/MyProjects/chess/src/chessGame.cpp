@@ -30,9 +30,9 @@ ChessGame::ChessGame()
     queenB.set(false, "queen", 240.0f, 0.0f);
     queenW.set(true, "queen", 240.0f, 560.0f);
 }
-
+// Return 0 if step to empty else 1
 bool ChessGame::toStep(Point endP)
-{ // 0 - empty  1 - enemy
+{
     bool isAnyBodyOutThere = false;
     if (deck[endP.row][endP.col] != empty)
         isAnyBodyOutThere = true;
@@ -62,7 +62,7 @@ void ChessGame::logicOperation(Point initialPoint)
             --i;
             continue;
         }
-        else if (deck[points[i].row][points[i].col] != empty && ((elem->showType() == "pawn" && !points[i].isAttack) || (elem->showType() != "pawn" && points[i].isAttack))) 
+        else if (deck[points[i].row][points[i].col] != empty && ((elem->showType() == "pawn" && !points[i].isAttack) || (elem->showType() != "pawn" && points[i].isAttack)))
         {
             if ((points[i].row - initialPoint.row) != 0)
                 step.row = ((points[i].row - initialPoint.row) / abs(points[i].row - initialPoint.row));
@@ -95,8 +95,11 @@ bool ChessGame::OnUserCreate()
     sprPawnBlack = new olc::Sprite("./images/pawnBlack.png");
 
     sprQueenWhite = new olc::Sprite("./images/queenWhite.png");
+    sprQueenBlack = new olc::Sprite("./images/queenBlack.png");
 
+    decQueenBlack = new olc::Decal(sprQueenBlack);
     decQueenWhite = new olc::Decal(sprQueenWhite);
+
     decPawnWhite = new olc::Decal(sprPawnWhite);
     decPawnBlack = new olc::Decal(sprPawnBlack);
 
@@ -121,47 +124,37 @@ bool ChessGame::OnUserUpdate(float fElapsedTime)
     {
         for (int j = 0; j < 8; j++)
         {
-            if (deck[i][j] != empty && deck[i][j]->showType() == "pawn" && deck[i][j]->showColor()) // ret 1 if white else black 0
+            if (pSelected == &(deck[i][j]->olcPos))
             {
-                if (pSelected == &(deck[i][j]->olcPos))
-                {
-                    iTempIndex = i;
-                    jTempIndex = j;
-                    continue;
-                }
-
+                iTempIndex = i;
+                jTempIndex = j;
+            }
+            else if (deck[i][j] != empty && deck[i][j]->showType() == "pawn" && deck[i][j]->showColor())
                 DrawDecal(deck[i][j]->olcPos, decPawnWhite);
-            }
+
             else if (deck[i][j] != empty && deck[i][j]->showType() == "pawn")
-            {
-                if (pSelected == &(deck[i][j]->olcPos))
-                {
-                    iTempIndex = i;
-                    jTempIndex = j;
-                    continue;
-                }
                 DrawDecal(deck[i][j]->olcPos, decPawnBlack);
-            }
+
             else if (deck[i][j] != empty && deck[i][j]->showType() == "queen" && deck[i][j]->showColor())
-            {
-                if (pSelected == &(deck[i][j]->olcPos))
-                {
-                    iTempIndex = i;
-                    jTempIndex = j;
-                    continue;
-                }
-                DrawDecal(deck[i][j]->olcPos, decQueenWhite);
-            }
+                DrawDecal(deck[i][j]->olcPos, decQueenWhite, {(0.5f), (0.5f)});
+
+            else if (deck[i][j] != empty && deck[i][j]->showType() == "queen")
+                DrawDecal(deck[i][j]->olcPos, decQueenBlack, {(0.5f), (0.5f)});
         }
     }
     if ((iTempIndex >= 0) && (jTempIndex >= 0))
     {
         if (deck[iTempIndex][jTempIndex]->showType() == "pawn" && deck[iTempIndex][jTempIndex]->showColor())
             DrawDecal(deck[iTempIndex][jTempIndex]->olcPos, decPawnWhite);
+
         else if (deck[iTempIndex][jTempIndex]->showType() == "pawn")
             DrawDecal(deck[iTempIndex][jTempIndex]->olcPos, decPawnBlack);
+
         else if (deck[iTempIndex][jTempIndex]->showType() == "queen" && deck[iTempIndex][jTempIndex]->showColor())
-            DrawDecal(deck[iTempIndex][jTempIndex]->olcPos, decQueenWhite);
+            DrawDecal(deck[iTempIndex][jTempIndex]->olcPos, decQueenWhite, {(0.5f), (0.5f)});
+
+        else if (deck[iTempIndex][jTempIndex]->showType() == "queen")
+            DrawDecal(deck[iTempIndex][jTempIndex]->olcPos, decQueenBlack, {(0.5f), (0.5f)});
 
         iTempIndex = -1;
         jTempIndex = -1;
@@ -231,8 +224,8 @@ bool ChessGame::OnUserUpdate(float fElapsedTime)
     {
         for (unsigned i = 0; i < points.size(); i++)
         {
-            DrawRect(points[i].col * 80 + 2, points[i].row * 80 + 2, 75, 75, olc::VERY_DARK_GREEN);
-            DrawRect(points[i].col * 80 + 3, points[i].row * 80 + 3, 73, 73, olc::GREEN);
+            DrawRect(points[i].col * 80 + 2, points[i].row * 80 + 2, 75, 75, olc::VERY_DARK_YELLOW);
+            DrawRect(points[i].col * 80 + 3, points[i].row * 80 + 3, 73, 73, olc::YELLOW);
         }
         *pSelected = (mouse - olc::vf2d{40.0f, 40.0f});
     }
