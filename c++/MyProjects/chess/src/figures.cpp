@@ -11,6 +11,17 @@ void Figures::set(bool bl, std::string str, float x, float y)
     isWhite = bl;
     type = str;
 }
+
+bool Figures::isInitial() const
+{
+    return isInit;
+}
+
+void Figures::setInitial(bool bl)
+{
+    isInit = bl;
+}
+
 bool Figures::showColor() const
 {
     return isWhite;

@@ -10,13 +10,16 @@ class Figures
 {
 protected:
     bool isWhite;
+    bool isInit = true;
     std::string type;
 
 public:
     void set(bool, std::string, float, float);
+    void setInitial(bool);
     olc::vf2d olcPos;
 
 public:
+    bool isInitial() const;
     bool showColor() const;
     std::string showType() const;
     virtual void move(int, int, std::vector<Point> &) = 0;

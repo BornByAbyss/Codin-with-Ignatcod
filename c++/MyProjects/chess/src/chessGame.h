@@ -46,9 +46,38 @@ private:
 
 private:
     std::vector<Point> points; //     massive of all possible steps include deck position
-    Point initialPoint;
+
+    std::vector<Point> tempPoints;
+
+    Figures *endTemp;
+    Figures *begTemp;
+
+    Figures *forPawn = nullptr;
+
+    olc::vf2d prevOlc1;
+    olc::vf2d prevOlc2;
+
     Point begP;
-    Point prevStep;
+
+    Point InitialPoint;
+
+    Point prevInitialPoint;
+    Point prevFinalPoint;
+
+    bool isCheck = false;
+    bool colorOfCheck;
+
+    bool can77;
+
+
+    bool prevInit;
+
+    Point posOfCheck;
+
+    Point tempPointlog;
+
+    bool turn = true;
+
     bool notFound = true;
     bool isFind = false;
 
@@ -75,9 +104,20 @@ private:
 
 public:
     ChessGame();
+    bool logicOperation(Point, std::vector<Point> &, Point &);
+    bool isWhiteCheck(std::vector<Point> &);
+    bool isBlackCheck(std::vector<Point> &);
+    bool WhiteCastling();
+
+
+    bool isCheckOnBoard(std::vector<Point> &);
+
+    void specialForCastling();
     void toStep(Point);
-    void logicOperation(Point);
-    void clearPoints();
+    void clearPoints(std::vector<Point> &);
+    void specialForCheck();
+    void toBackStep();
+
     virtual bool OnUserCreate() override;
     virtual bool OnUserUpdate(float fElapsedTime) override;
 };
