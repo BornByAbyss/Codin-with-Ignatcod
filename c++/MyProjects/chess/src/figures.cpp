@@ -30,6 +30,19 @@ std::string Figures::showType() const
 {
     return type;
 }
+Figures Figures::operator=(Figures fig)
+{
+    olcPos.x = fig.olcPos.x;
+    olcPos.y = fig.olcPos.y;
+
+    type = fig.type;
+    isWhite = fig.isWhite;
+    isInit = fig.isInit;
+    return *this;
+}
+void Figures::move(int c1, int c2, std::vector<Point> &points)
+{
+}
 
 void Pawn::move(int c1, int c2, std::vector<Point> &points)
 {

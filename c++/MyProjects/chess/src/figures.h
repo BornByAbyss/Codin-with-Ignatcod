@@ -5,6 +5,7 @@
 #include <vector>
 #include "point.h"
 #include "olcPixelGameEngine.h"
+#include <stack>
 
 class Figures
 {
@@ -16,13 +17,18 @@ protected:
 public:
     void set(bool, std::string, float, float);
     void setInitial(bool);
+
     olc::vf2d olcPos;
 
 public:
     bool isInitial() const;
     bool showColor() const;
     std::string showType() const;
-    virtual void move(int, int, std::vector<Point> &) = 0;
+
+    Figures operator =(Figures);
+   
+
+    virtual void move(int, int, std::vector<Point> &);
 };
 
 class Pawn : public Figures

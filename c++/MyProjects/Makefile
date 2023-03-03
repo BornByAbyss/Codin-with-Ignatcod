@@ -8,10 +8,10 @@ SRC = $(wildcard $(PREF_SRC)*.cpp)
 OBJ = $(patsubst $(PREF_SRC)%.cpp, $(PREF_OBJ)%.o, $(SRC))
 
 $(TARGET) : $(OBJ)
-	$(CXX) -std=c++17 $(OBJ) -o $(TARGET) -lX11 -lGL -lpng -lpthread
+	$(CXX) -g -std=c++17 $(OBJ) -o $(TARGET) -lX11 -lGL -lpng -lpthread
 
 $(PREF_OBJ)%.o : $(PREF_SRC)%.cpp
-	$(CXX) -std=c++17 -c $< -o $@
+	$(CXX) -g -std=c++17 -c $< -o $@
 	
 clean :
 	rm $(TARGET) $(PREF_OBJ)*.o

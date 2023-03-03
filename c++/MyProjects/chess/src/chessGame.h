@@ -47,43 +47,27 @@ private:
 private:
     std::vector<Point> points; //     massive of all possible steps include deck position
 
-    std::vector<Point> tempPoints;
-
-    Figures *endTemp;
-    Figures *begTemp;
-
-    Figures *forPawn = nullptr;
-
-    olc::vf2d prevOlc1;
-    olc::vf2d prevOlc2;
-
-    Point begP;
-
-    Point InitialPoint;
-
-    Point prevInitialPoint;
-    Point prevFinalPoint;
-
-    bool isCheck = false;
-    bool colorOfCheck;
-
-    bool can77;
-
-
-    bool prevInit;
-
-    Point posOfCheck;
-
-    Point tempPointlog;
-
     bool turn = true;
-
-    bool notFound = true;
+    bool isCheck = false;
     bool isFind = false;
+
+    Point initialPoint;
+    Point checkPosition;
 
 private:
     Pawn pawnB1, pawnB2, pawnB3, pawnB4, pawnB5, pawnB6, pawnB7, pawnB8;
     Pawn pawnW1, pawnW2, pawnW3, pawnW4, pawnW5, pawnW6, pawnW7, pawnW8;
+
+    std::vector<std::vector<std::vector<Figures *>>> deckNotation;
+
+    std::vector<std::vector<Figures *>> tempBoard = {{empty, empty, empty, empty, empty, empty, empty, empty},
+                                                     {empty, empty, empty, empty, empty, empty, empty, empty},
+                                                     {empty, empty, empty, empty, empty, empty, empty, empty},
+                                                     {empty, empty, empty, empty, empty, empty, empty, empty},
+                                                     {empty, empty, empty, empty, empty, empty, empty, empty},
+                                                     {empty, empty, empty, empty, empty, empty, empty, empty},
+                                                     {empty, empty, empty, empty, empty, empty, empty, empty},
+                                                     {empty, empty, empty, empty, empty, empty, empty, empty}};
 
     Queen queenW, queenB;
 
@@ -93,30 +77,33 @@ private:
     King kingW, kingB;
 
     Figures *empty = nullptr;
-    Figures *deck[8][8] = {{&rookB1, empty, empty, &queenB, &kingB, empty, empty, &rookB2},
-                           {&pawnB1, &pawnB2, &pawnB3, &pawnB4, &pawnB5, &pawnB6, &pawnB7, &pawnB8},
-                           {empty, empty, empty, empty, empty, empty, empty, empty},
-                           {empty, empty, empty, empty, empty, empty, empty, empty},
-                           {empty, empty, empty, empty, empty, empty, empty, empty},
-                           {empty, empty, empty, empty, empty, empty, empty, empty},
-                           {&pawnW1, &pawnW2, &pawnW3, &pawnW4, &pawnW5, &pawnW6, &pawnW7, &pawnW8},
-                           {&rookW1, empty, empty, &queenW, &kingW, empty, empty, &rookW2}};
+
+    std::vector<std::vector<Figures *>> deck = {{&rookB1, empty, empty, &queenB, &kingB, empty, empty, &rookB2},
+                                                {&pawnB1, &pawnB2, &pawnB3, &pawnB4, &pawnB5, &pawnB6, &pawnB7, &pawnB8},
+                                                {empty, empty, empty, empty, empty, empty, empty, empty},
+                                                {empty, empty, empty, empty, empty, empty, empty, empty},
+                                                {empty, empty, empty, empty, empty, empty, empty, empty},
+                                                {empty, empty, empty, empty, empty, empty, empty, empty},
+                                                {&pawnW1, &pawnW2, &pawnW3, &pawnW4, &pawnW5, &pawnW6, &pawnW7, &pawnW8},
+                                                {&rookW1, empty, empty, &queenW, &kingW, empty, empty, &rookW2}};
 
 public:
     ChessGame();
-    bool logicOperation(Point, std::vector<Point> &, Point &);
-    bool isWhiteCheck(std::vector<Point> &);
-    bool isBlackCheck(std::vector<Point> &);
+    void getPossibleCells(const Point, std::vector<Point> &);
+
+    void checkAnalisysPoints();
+    bool isCheckOnBoard();
+    bool isWhiteCheck();
+    bool isBlackCheck();
+
     bool WhiteCastling();
 
+    void saveBoard();
 
-    bool isCheckOnBoard(std::vector<Point> &);
+    void toStep(Point, Point);
+    void stepBack();
 
-    void specialForCastling();
-    void toStep(Point);
     void clearPoints(std::vector<Point> &);
-    void specialForCheck();
-    void toBackStep();
 
     virtual bool OnUserCreate() override;
     virtual bool OnUserUpdate(float fElapsedTime) override;
