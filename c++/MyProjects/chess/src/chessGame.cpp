@@ -40,36 +40,34 @@ ChessGame::ChessGame()
     kingB.set(false, "king", 320.0f, 0.0f);
 }
 
-void ChessGame::toStep(Point inPoint, Point endP)
+void ChessGame::toStep(Point initialPosition, Point finalPosition)
 {
-    if (deck[inPoint.row][inPoint.col]->showType() == "king" && deck[inPoint.row][inPoint.col]->isInitial() && endP.row == 7 && endP.col == 7)
+    if (deck[initialPosition.row][initialPosition.col]->showType() == "king" && deck[initialPosition.row][initialPosition.col]->isInitial() && finalPosition.row == 7 && finalPosition.col == 7)
     {
-        deck[7][6] = deck[inPoint.row][inPoint.col];
+        deck[7][6] = deck[initialPosition.row][initialPosition.col];
         deck[7][6]->olcPos.x = 480.0f;
         deck[7][6]->olcPos.y = 560.0f;
 
-        deck[7][5] = deck[endP.row][endP.col];
+        deck[7][5] = deck[finalPosition.row][finalPosition.col];
         deck[7][5]->olcPos.x = 400.0f;
         deck[7][5]->olcPos.y = 560.0f;
 
-        deck[inPoint.row][inPoint.col]->setInitial(false);
-        deck[inPoint.row][inPoint.col] = empty;
-        deck[endP.row][endP.col] = empty;
+        deck[initialPosition.row][initialPosition.col]->setInitial(false);
+        deck[initialPosition.row][initialPosition.col] = empty;
+        deck[finalPosition.row][finalPosition.col] = empty;
         saveBoard();
+
         return;
     }
-    else if (deck[inPoint.row][inPoint.col]->showType() == "pawn" && inPoint.row == 3 && deck[inPoint.row][inPoint.col]->showColor() && endP.isAttack && deck[endP.row][endP.col] == empty)
-    {
-        deck[endP.row + 1][endP.col] = empty;
-    }
-    else if (deck[inPoint.row][inPoint.col]->showType() == "pawn" && inPoint.row == 4 && !deck[inPoint.row][inPoint.col]->showColor() && endP.isAttack && deck[endP.row][endP.col] == empty)
-    {
-        deck[endP.row - 1][endP.col] = empty;
-    }
-    deck[endP.row][endP.col] = deck[inPoint.row][inPoint.col];
-    deck[inPoint.row][inPoint.col]->setInitial(false);
-    deck[inPoint.row][inPoint.col] = empty;
+    else if (deck[initialPosition.row][initialPosition.col]->showType() == "pawn" && initialPosition.row == 3 && deck[initialPosition.row][initialPosition.col]->showColor() && finalPosition.isAttack && deck[finalPosition.row][finalPosition.col] == empty)
+        deck[finalPosition.row + 1][finalPosition.col] = empty;
 
+    else if (deck[initialPosition.row][initialPosition.col]->showType() == "pawn" && initialPosition.row == 4 && !deck[initialPosition.row][initialPosition.col]->showColor() && finalPosition.isAttack && deck[finalPosition.row][finalPosition.col] == empty)
+        deck[finalPosition.row - 1][finalPosition.col] = empty;
+
+    deck[finalPosition.row][finalPosition.col] = deck[initialPosition.row][initialPosition.col];
+    deck[initialPosition.row][initialPosition.col]->setInitial(false);
+    deck[initialPosition.row][initialPosition.col] = empty;
     saveBoard();
 }
 
@@ -92,6 +90,7 @@ void ChessGame::saveBoard()
                     tempBoard[i][j] = new King;
 
                 *tempBoard[i][j] = *deck[i][j];
+                tempBoard[i][j]->setInitial(deck[i][j]->isInitial());
             }
             else
             {
@@ -116,6 +115,7 @@ void ChessGame::stepBack()
                 deck[i][j] = deckNotation[deckNotation.size() - 2][i][j];
                 deck[i][j]->olcPos.x = (float)j * 80.0f;
                 deck[i][j]->olcPos.y = (float)i * 80.0f;
+                deck[i][j]->setInitial(deckNotation[deckNotation.size() - 2][i][j]->isInitial());
             }
             else
             {
@@ -183,43 +183,38 @@ void ChessGame::getPossibleCells(const Point initialPoint, std::vector<Point> &p
 bool ChessGame::WhiteCastling()
 {
     std::vector<Point> tempPoints;
-    for (int i = 0; i < 8; i++)
+    if (deck[7][4]->showType() == "king" && deck[7][4]->isInitial() && deck[7][4]->showColor() && deck[7][7] != empty && deck[7][7]->showType() == "rook" && deck[7][7]->isInitial())
     {
-        for (int j = 0; j < 8; j++)
+        for (int i = 0; i < 8; i++)
         {
-            if (deck[i][j] != empty && !deck[i][j]->showColor())
+            for (int j = 0; j < 8; j++)
             {
-                getPossibleCells(Point{i, j}, tempPoints);
-                for (int k = 0; k < tempPoints.size(); k++)
+                if (deck[i][j] != empty && !deck[i][j]->showColor())
                 {
-                    for (int f = 5; f < 7; f++)
+                    getPossibleCells(Point{i, j}, tempPoints);
+                    for (int k = 0; k < tempPoints.size(); k++)
                     {
-                        if (deck[7][f] != empty)
+                        for (int f = 5; f < 7; f++)
                         {
-                            return false;
+                            if (deck[7][f] != empty)
+                            {
+                                return false;
+                            }
+                        }
+                        for (int f = 4; f < 8; f++)
+                        {
+                            if ((deck[i][j]->showType() == "pawn" && i == 6 && j > 2) || (isWhiteCheck()) || (tempPoints[k].row == 7 && tempPoints[k].col == f && tempPoints[k].isAttack))
+                            {
+                                return false;
+                            }
                         }
                     }
-                    for (int f = 4; f < 8; f++)
-                    {
-                        if (deck[i][j]->showType() == "pawn" && i == 6 && j > 2)
-                        {
-                            return false;
-                        }
-                        if (tempPoints[k].row == 7 && tempPoints[k].col == f && tempPoints[k].isAttack)
-                        {
-                            return false;
-                        }
-                        if (isWhiteCheck())
-                        {
-                            return false;
-                        }
-                    }
+                    clearPoints(tempPoints);
                 }
-                clearPoints(tempPoints);
             }
         }
+        points.push_back(Point{7, 7, false});
     }
-    return true;
 }
 
 void ChessGame::checkAnalisysPoints()
@@ -234,7 +229,6 @@ void ChessGame::checkAnalisysPoints()
             --i;
         }
         stepBack();
-        deckNotation.pop_back();
     }
 }
 
@@ -247,7 +241,6 @@ bool ChessGame::isBlackCheck()
         {
             if (deck[i][j] != empty && deck[i][j]->showColor())
             {
-                clearPoints(blackPossibleSteps);
                 getPossibleCells(Point{i, j}, blackPossibleSteps);
 
                 for (int k = 0; k < blackPossibleSteps.size(); k++)
@@ -258,6 +251,7 @@ bool ChessGame::isBlackCheck()
                         return true;
                     }
                 }
+                clearPoints(blackPossibleSteps);
             }
         }
     }
@@ -272,7 +266,6 @@ bool ChessGame::isWhiteCheck()
         {
             if (deck[i][j] != empty && !deck[i][j]->showColor())
             {
-                clearPoints(whitePossibleSteps);
                 getPossibleCells(Point{i, j}, whitePossibleSteps);
 
                 for (int k = 0; k < whitePossibleSteps.size(); k++)
@@ -283,6 +276,7 @@ bool ChessGame::isWhiteCheck()
                         return true;
                     }
                 }
+                clearPoints(whitePossibleSteps);
             }
         }
     }
@@ -427,23 +421,17 @@ bool ChessGame::OnUserUpdate(float fElapsedTime)
                 {
                     if (turn == deck[i][j]->showColor())
                     {
+                        initialPoint = Point{i, j};
+                        clearPoints(points);
+                        getPossibleCells(initialPoint, points);
+
+                        checkAnalisysPoints();
+
+                       if (deck[i][j]->showType() == "king" && deck[i][j]->showColor())
+                            WhiteCastling();
 
                         pSelected = &deck[i][j]->olcPos;
                         temp = deck[i][j]->olcPos;
-
-                        initialPoint = Point{i, j};
-
-                        clearPoints(points);
-                        getPossibleCells(initialPoint, points);
-                        // checkAnalisysPoints();
-
-                        if (deck[i][j]->showType() == "king" && deck[i][j]->isInitial() & deck[i][j]->showColor() && deck[7][7] != empty && deck[7][7]->showType() == "rook" && deck[7][7]->isInitial())
-                        {
-                            if (WhiteCastling())
-                            {
-                                points.push_back(Point{7, 7, false});
-                            }
-                        }
 
                         break;
                     }
