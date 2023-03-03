@@ -24,7 +24,7 @@ public:
     bool isInitial() const;
     bool showColor() const;
     std::string showType() const;
-
+    
     Figures operator =(Figures);
    
 

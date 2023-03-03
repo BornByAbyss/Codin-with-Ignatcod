@@ -76,6 +76,7 @@ private:
 
     King kingW, kingB;
 
+
     Figures *empty = nullptr;
 
     std::vector<std::vector<Figures *>> deck = {{&rookB1, empty, empty, &queenB, &kingB, empty, empty, &rookB2},

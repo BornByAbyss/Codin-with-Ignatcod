@@ -42,8 +42,7 @@ ChessGame::ChessGame()
 
 void ChessGame::toStep(Point inPoint, Point endP)
 {
-    deck[inPoint.row][inPoint.col]->setInitial(false);
-    if (deck[inPoint.row][inPoint.col]->showType() == "king" && endP.row == 7 && endP.col == 7)
+    if (deck[inPoint.row][inPoint.col]->showType() == "king" && deck[inPoint.row][inPoint.col]->isInitial() && endP.row == 7 && endP.col == 7)
     {
         deck[7][6] = deck[inPoint.row][inPoint.col];
         deck[7][6]->olcPos.x = 480.0f;
@@ -53,6 +52,7 @@ void ChessGame::toStep(Point inPoint, Point endP)
         deck[7][5]->olcPos.x = 400.0f;
         deck[7][5]->olcPos.y = 560.0f;
 
+        deck[inPoint.row][inPoint.col]->setInitial(false);
         deck[inPoint.row][inPoint.col] = empty;
         deck[endP.row][endP.col] = empty;
         saveBoard();
@@ -67,6 +67,7 @@ void ChessGame::toStep(Point inPoint, Point endP)
         deck[endP.row - 1][endP.col] = empty;
     }
     deck[endP.row][endP.col] = deck[inPoint.row][inPoint.col];
+    deck[inPoint.row][inPoint.col]->setInitial(false);
     deck[inPoint.row][inPoint.col] = empty;
 
     saveBoard();
@@ -74,6 +75,7 @@ void ChessGame::toStep(Point inPoint, Point endP)
 
 void ChessGame::saveBoard()
 {
+
     for (int i = 0; i < 8; i++)
     {
         for (int j = 0; j < 8; j++)
@@ -81,25 +83,15 @@ void ChessGame::saveBoard()
             if (deck[i][j] != nullptr)
             {
                 if (deck[i][j]->showType() == "pawn")
-                {
                     tempBoard[i][j] = new Pawn;
-                    *tempBoard[i][j] = *deck[i][j];
-                }
                 else if (deck[i][j]->showType() == "rook")
-                {
                     tempBoard[i][j] = new Rook;
-                    *tempBoard[i][j] = *deck[i][j];
-                }
                 else if (deck[i][j]->showType() == "queen")
-                {
                     tempBoard[i][j] = new Queen;
-                    *tempBoard[i][j] = *deck[i][j];
-                }
                 else if (deck[i][j]->showType() == "king")
-                {
                     tempBoard[i][j] = new King;
-                    *tempBoard[i][j] = *deck[i][j];
-                }
+
+                *tempBoard[i][j] = *deck[i][j];
             }
             else
             {
@@ -111,8 +103,28 @@ void ChessGame::saveBoard()
 }
 void ChessGame::stepBack()
 {
+    for (int i = 0; i < 8; i++)
+    {
+        for (int j = 0; j < 8; j++)
+        {
+            if (deckNotation[deckNotation.size() - 1][i][j] != nullptr)
+            {
+                delete deckNotation[deckNotation.size() - 1][i][j];
+            }
+            if (deckNotation[deckNotation.size() - 2][i][j] != nullptr)
+            {
+                deck[i][j] = deckNotation[deckNotation.size() - 2][i][j];
+                deck[i][j]->olcPos.x = (float)j * 80.0f;
+                deck[i][j]->olcPos.y = (float)i * 80.0f;
+            }
+            else
+            {
+                deck[i][j] = empty;
+            }
+        }
+    }
+
     deckNotation.pop_back();
-    deck = deckNotation[deckNotation.size() - 1];
 }
 
 void ChessGame::getPossibleCells(const Point initialPoint, std::vector<Point> &points)
@@ -330,8 +342,11 @@ bool ChessGame::OnUserUpdate(float fElapsedTime)
 
     if (GetKey(olc::LEFT).bPressed)
     {
-        turn = !turn;
-        stepBack();
+        if (deckNotation.size() > 1)
+        {
+            turn = !turn;
+            stepBack();
+        }
     }
 
     for (int i = 0; i < 8; i++)
