@@ -11,8 +11,14 @@
 ChessGame::ChessGame()
 {
     sAppName = "Chess";
+
+    bishopB1.set(false, "bishop", 160.0f, 0.0f);
+    bishopB2.set(false, "bishop", 400.0f, 0.0f);
+    bishopW1.set(true, "bishop", 160.0f, 560.0f);
+    bishopW2.set(true, "bishop", 400.0f, 560.0f);
+
     pawnW1.set(true, "pawn", 0.0f, 480.0);
-    pawnW2.set(true, "pawn", 80.0f, 480.0);
+    pawnW2.set(true, "pawn", 240.0f, 160.0);
     pawnW3.set(true, "pawn", 160.0f, 480.0);
     pawnW4.set(true, "pawn", 240.0f, 480.0);
     pawnW5.set(true, "pawn", 320.0f, 480.0);
@@ -40,6 +46,11 @@ ChessGame::ChessGame()
 
     kingW.set(true, "king", 320.0f, 560.0f);
     kingB.set(false, "king", 320.0f, 0.0f);
+
+    knightB1.set(false, "knight", 80.0f, 0.0f);
+    knightB2.set(false, "knight", 480.0f, 0.0f);
+    knightW1.set(true, "knight", 80.0f, 560.0f);
+    knightW2.set(true, "knight", 480.0f, 560.0f);
 }
 
 void ChessGame::toStep(Point initialPosition, Point finalPosition, bool bl)
@@ -164,6 +175,10 @@ void ChessGame::saveBoard()
                     tempBoard[i][j] = new Queen;
                 else if (deck[i][j]->showType() == "king")
                     tempBoard[i][j] = new King;
+                else if (deck[i][j]->showType() == "knight")
+                    tempBoard[i][j] = new Knight;
+                else if (deck[i][j]->showType() == "bishop")
+                    tempBoard[i][j] = new Bishop;
 
                 *tempBoard[i][j] = *deck[i][j];
             }
@@ -470,8 +485,20 @@ bool ChessGame::isCheckOnBoard()
     return (isBlackCheck() || isWhiteCheck());
 }
 
+void ChessGame::selector(const olc::vf2d posSelector)
+{
+}
+
 bool ChessGame::OnUserCreate()
 {
+    deck = {{&rookB1, &knightB1, &bishopB1, &queenB, &kingB, &bishopB2, &knightB2, &rookB2},
+            {&pawnB1, &pawnB2, &pawnB3, &pawnB4, &pawnB5, &pawnB6, &pawnB7, &pawnB8},
+            {empty, empty, empty, &pawnW2, empty, empty, empty, empty},
+            {empty, empty, empty, empty, empty, empty, empty, empty},
+            {empty, empty, empty, empty, empty, empty, empty, empty},
+            {empty, empty, empty, empty, empty, empty, empty, empty},
+            {&pawnW1, empty, &pawnW3, &pawnW4, &pawnW5, &pawnW6, &pawnW7, &pawnW8},
+            {&rookW1, &knightW1, &bishopW1, &queenW, &kingW, &bishopW2, &knightW2, &rookW2}};
     saveBoard();
 
     sprDeck = new olc::Sprite("./images/deck.png");
@@ -487,6 +514,18 @@ bool ChessGame::OnUserCreate()
 
     sprKingWhite = new olc::Sprite("./images/kingWhite.png");
     sprKingBlack = new olc::Sprite("./images/kingBlack.png");
+
+    sprKnightWhite = new olc::Sprite("./images/knightWhite.png");
+    sprKnightBlack = new olc::Sprite("./images/knightBlack.png");
+
+    sprBishopWhite = new olc::Sprite("./images/bishopWhite.png");
+    sprBishopBlack = new olc::Sprite("./images/bishopBlack.png");
+
+    decBishopBlack = new olc::Decal(sprBishopBlack);
+    decBishopWhite = new olc::Decal(sprBishopWhite);
+
+    decKnightBlack = new olc::Decal(sprKnightBlack);
+    decKnightWhite = new olc::Decal(sprKnightWhite);
 
     decQueenBlack = new olc::Decal(sprQueenBlack);
     decQueenWhite = new olc::Decal(sprQueenWhite);
@@ -516,19 +555,13 @@ bool ChessGame::OnUserUpdate(float fElapsedTime)
 {
     Clear(olc::BLANK);
 
-    if (GetKey(olc::LEFT).bPressed)
-    {
-        if (deckNotation.size() > 1)
-        {
-            turn = !turn;
-            stepBack();
-        }
-    }
-
     for (int i = 0; i < 8; i++)
     {
         for (int j = 0; j < 8; j++)
         {
+            if (isSelectorOn && deck[i][j] != empty && deck[i][j]->olcPos.x == (*pSelected).x && deck[i][j]->olcPos.y >= 0.0f && deck[i][j]->olcPos.y <= 320.0f)
+                continue;
+
             if (pSelected == &(deck[i][j]->olcPos))
             {
                 iTempIndex = i;
@@ -557,8 +590,21 @@ bool ChessGame::OnUserUpdate(float fElapsedTime)
 
             else if (deck[i][j] != empty && deck[i][j]->showType() == "king")
                 DrawDecal(deck[i][j]->olcPos, decKingBlack);
+
+            else if (deck[i][j] != empty && deck[i][j]->showType() == "knight" && deck[i][j]->showColor())
+                DrawDecal(deck[i][j]->olcPos, decKnightWhite);
+
+            else if (deck[i][j] != empty && deck[i][j]->showType() == "knight")
+                DrawDecal(deck[i][j]->olcPos, decKnightBlack);
+
+            else if (deck[i][j] != empty && deck[i][j]->showType() == "bishop" && deck[i][j]->showColor())
+                DrawDecal(deck[i][j]->olcPos, decBishopWhite);
+
+            else if (deck[i][j] != empty && deck[i][j]->showType() == "bishop")
+                DrawDecal(deck[i][j]->olcPos, decBishopBlack);
         }
     }
+
     if ((iTempIndex >= 0) && (jTempIndex >= 0))
     {
         if (deck[iTempIndex][jTempIndex]->showType() == "pawn" && deck[iTempIndex][jTempIndex]->showColor())
@@ -585,11 +631,48 @@ bool ChessGame::OnUserUpdate(float fElapsedTime)
         else if (deck[iTempIndex][jTempIndex]->showType() == "king")
             DrawDecal(deck[iTempIndex][jTempIndex]->olcPos, decKingBlack);
 
+        else if (deck[iTempIndex][jTempIndex]->showType() == "knight" && deck[iTempIndex][jTempIndex]->showColor())
+            DrawDecal(deck[iTempIndex][jTempIndex]->olcPos, decKnightWhite);
+
+        else if (deck[iTempIndex][jTempIndex]->showType() == "knight")
+            DrawDecal(deck[iTempIndex][jTempIndex]->olcPos, decKnightBlack);
+
+        else if (deck[iTempIndex][jTempIndex]->showType() == "bishop" && deck[iTempIndex][jTempIndex]->showColor())
+            DrawDecal(deck[iTempIndex][jTempIndex]->olcPos, decBishopWhite);
+
+        else if (deck[iTempIndex][jTempIndex]->showType() == "bishop")
+            DrawDecal(deck[iTempIndex][jTempIndex]->olcPos, decBishopBlack);
+
         iTempIndex = -1;
         jTempIndex = -1;
     }
-
     olc::vf2d mouse = {float(GetMouseX()), float(GetMouseY())};
+
+    if (isSelectorOn)
+    {
+        FillRect((*pSelected).x, 0.0f, 80.0f, 320.0f, olc::GREY);
+        DrawDecal(olc::vf2d{(*pSelected).x, (*pSelected).y}, decQueenWhite, {(0.5f), (0.5f)});
+        DrawDecal(olc::vf2d{(*pSelected).x, (*pSelected).y + 80.0f}, decRookWhite);
+        DrawDecal(olc::vf2d{(*pSelected).x, (*pSelected).y + 160.0f}, decKnightWhite);
+        DrawDecal(olc::vf2d{(*pSelected).x, (*pSelected).y + 240.0f}, decBishopWhite);
+
+        if (GetMouse(0).bPressed)
+        {
+            if (((mouse.x > (*pSelected).x) && (mouse.x < (*pSelected).x + 80.0f)) && ((mouse.y > (*pSelected).y) && (mouse.y < (*pSelected).y + 80.0f)))
+            {
+            }
+            else if (((mouse.x > (*pSelected).x) && (mouse.x < (*pSelected).x + 80.0f)) && ((mouse.y > (*pSelected).y + 80.0f) && (mouse.y < (*pSelected).y + 160.0f)))
+            {
+            }
+            else if (((mouse.x > (*pSelected).x) && (mouse.x < (*pSelected).x + 80.0f)) && ((mouse.y > (*pSelected).y + 160.0f) && (mouse.y < (*pSelected).y + 240.0f)))
+            {
+            }
+            else if (((mouse.x > (*pSelected).x) && (mouse.x < (*pSelected).x + 80.0f)) && ((mouse.y > (*pSelected).y + 240.0f) && (mouse.y < (*pSelected).y + 320.0f)))
+            {
+            }
+        }
+        return true;
+    }
 
     if (GetMouse(0).bPressed)
     {
@@ -634,6 +717,12 @@ bool ChessGame::OnUserUpdate(float fElapsedTime)
 
                 toStep(initialPoint, points[k], true);
 
+                if (deck[points[k].row][points[k].col]->showType() == "pawn" && deck[points[k].row][points[k].col]->showColor() && points[k].row == 0)
+                {
+                    isSelectorOn = true;
+                    return true;
+                }
+
                 isFind = true;
                 turn = !turn;
                 break;
@@ -660,6 +749,16 @@ bool ChessGame::OnUserUpdate(float fElapsedTime)
             DrawRect(points[i].col * 80 + 3, points[i].row * 80 + 3, 73, 73, olc::YELLOW);
         }
         *pSelected = (mouse - olc::vf2d{40.0f, 40.0f});
+    }
+
+    if (GetKey(olc::LEFT).bPressed)
+    {
+        if (deckNotation.size() > 1)
+        {
+            turn = !turn;
+            stepBack();
+            isSelectorOn = false;
+        }
     }
 
     return true;

@@ -88,10 +88,35 @@ void Rook::move(int c1, int c2, std::vector<Point> &points)
 }
 void Knight::move(int c1, int c2, std::vector<Point> &points)
 {
+    Point tempPoint;
+    std::vector<Point> movements = {{-2, 1, true}, {-2, -1, true}, {1, -2, true}, {-1, 2, true}, {-1, -2, true}, {2, -1, true}, {2, 1, true}, {1, 2, true}};
+
+    for (int i = 0; i < movements.size(); i++)
+    {
+        tempPoint = {c1, c2, true};
+        tempPoint += movements[i];
+        if (tempPoint.col < 0 || tempPoint.col >= 8 || tempPoint.row < 0 || tempPoint.row >= 8)
+            continue;
+        points.push_back(tempPoint);
+    }
 }
 void Bishop::move(int c1, int c2, std::vector<Point> &points)
 {
-}
+    Point tempPoint;
+    std::vector<Point> movements = {{-1, 1, true}, {1, -1, true}, {1, 1, true}, {-1, -1, true}};
+
+    for (int i = 0; i < movements.size(); i++)
+    {
+        tempPoint = {c1, c2, true};
+        while (true)
+        {
+            tempPoint += movements[i];
+            if (tempPoint.col < 0 || tempPoint.col >= 8 || tempPoint.row < 0 || tempPoint.row >= 8)
+                break;
+            points.push_back(tempPoint);
+        }
+    } 
+} 
 void Queen::move(int c1, int c2, std::vector<Point> &points)
 {
     Point tempPoint;

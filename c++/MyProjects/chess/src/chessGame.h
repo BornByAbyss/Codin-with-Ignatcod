@@ -32,6 +32,18 @@ private:
     olc::Sprite *sprQueenBlack = nullptr;
     olc::Sprite *sprQueenWhite = nullptr;
 
+    olc::Sprite *sprKnightBlack = nullptr;
+    olc::Sprite *sprKnightWhite = nullptr;
+
+    olc::Sprite *sprBishopBlack = nullptr;
+    olc::Sprite *sprBishopWhite = nullptr;
+
+     olc::Decal *decBishopBlack = nullptr;
+     olc::Decal *decBishopWhite = nullptr;
+
+    olc::Decal *decKnightBlack = nullptr;
+    olc::Decal *decKnightWhite = nullptr;
+
     olc::Decal *decQueenBlack = nullptr;
     olc::Decal *decQueenWhite = nullptr;
 
@@ -50,14 +62,12 @@ private:
     bool turn = true;
     bool isCheck = false;
     bool isFind = false;
+    bool isSelectorOn = false;
     Point prevInitialPoint;
     Point initialPoint;
     Point checkPosition;
 
 private:
-    Pawn pawnB1, pawnB2, pawnB3, pawnB4, pawnB5, pawnB6, pawnB7, pawnB8;
-    Pawn pawnW1, pawnW2, pawnW3, pawnW4, pawnW5, pawnW6, pawnW7, pawnW8;
-
     std::vector<std::vector<std::vector<Figures *>>> deckNotation;
 
     std::vector<std::vector<Figures *>> tempBoard = {{empty, empty, empty, empty, empty, empty, empty, empty},
@@ -69,7 +79,16 @@ private:
                                                      {empty, empty, empty, empty, empty, empty, empty, empty},
                                                      {empty, empty, empty, empty, empty, empty, empty, empty}};
 
+    Pawn pawnB1, pawnB2, pawnB3, pawnB4, pawnB5, pawnB6, pawnB7, pawnB8;
+    Pawn pawnW1, pawnW2, pawnW3, pawnW4, pawnW5, pawnW6, pawnW7, pawnW8;
+
     Queen queenW, queenB;
+
+
+    Bishop bishopW1, bishopW2, bishopB1, bishopB2;
+
+    Knight knightW1, knightW2, knightB1, knightB2;
+
 
     Rook rookW1, rookW2;
     Rook rookB1, rookB2;
@@ -78,14 +97,7 @@ private:
 
     Figures *empty = nullptr;
 
-    std::vector<std::vector<Figures *>> deck = {{&rookB1, empty, empty, &queenB, &kingB, empty, empty, &rookB2},
-                                                {&pawnB1, &pawnB2, &pawnB3, &pawnB4, &pawnB5, &pawnB6, &pawnB7, &pawnB8},
-                                                {empty, empty, empty, empty, empty, empty, empty, empty},
-                                                {empty, empty, empty, empty, empty, empty, empty, empty},
-                                                {empty, empty, empty, empty, empty, empty, empty, empty},
-                                                {empty, empty, empty, empty, empty, empty, empty, empty},
-                                                {&pawnW1, &pawnW2, &pawnW3, &pawnW4, &pawnW5, &pawnW6, &pawnW7, &pawnW8},
-                                                {&rookW1, empty, empty, &queenW, &kingW, empty, empty, &rookW2}};
+    std::vector<std::vector<Figures *>> deck;
 
 public:
     ChessGame();
@@ -95,6 +107,8 @@ public:
     bool isCheckOnBoard();
     bool isWhiteCheck();
     bool isBlackCheck();
+
+    void selector(const olc::vf2d);
 
     void whiteCastling();
     void blackCastling();
