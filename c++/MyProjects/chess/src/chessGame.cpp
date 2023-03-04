@@ -1,3 +1,5 @@
+
+
 #include <iostream>
 #include <iomanip>
 #include <vector>
@@ -40,10 +42,13 @@ ChessGame::ChessGame()
     kingB.set(false, "king", 320.0f, 0.0f);
 }
 
-void ChessGame::toStep(Point initialPosition, Point finalPosition)
+void ChessGame::toStep(Point initialPosition, Point finalPosition, bool bl)
 {
-    if (deck[initialPosition.row][initialPosition.col]->showType() == "king" && deck[initialPosition.row][initialPosition.col]->isInitial() && finalPosition.row == 7 && finalPosition.col == 7)
+    if (bl)
+        prevInitialPoint = initialPosition;
+    if (deck[initialPosition.row][initialPosition.col]->showType() == "king" && deck[initialPosition.row][initialPosition.col]->showColor() && deck[initialPosition.row][initialPosition.col]->isInitial() && finalPosition.row == 7 && finalPosition.col == 7)
     {
+
         deck[7][6] = deck[initialPosition.row][initialPosition.col];
         deck[7][6]->olcPos.x = 480.0f;
         deck[7][6]->olcPos.y = 560.0f;
@@ -52,10 +57,79 @@ void ChessGame::toStep(Point initialPosition, Point finalPosition)
         deck[7][5]->olcPos.x = 400.0f;
         deck[7][5]->olcPos.y = 560.0f;
 
-        deck[initialPosition.row][initialPosition.col]->setInitial(false);
         deck[initialPosition.row][initialPosition.col] = empty;
         deck[finalPosition.row][finalPosition.col] = empty;
         saveBoard();
+        if (bl)
+        {
+            deck[7][6]->setInitial(false);
+            deck[7][5]->setInitial(false);
+        }
+
+        return;
+    }
+    else if (deck[initialPosition.row][initialPosition.col]->showType() == "king" && deck[initialPosition.row][initialPosition.col]->showColor() && deck[initialPosition.row][initialPosition.col]->isInitial() && finalPosition.row == 7 && finalPosition.col == 0)
+    {
+        deck[7][2] = deck[initialPosition.row][initialPosition.col];
+        deck[7][2]->olcPos.x = 160.0f;
+        deck[7][2]->olcPos.y = 560.0f;
+
+        deck[7][3] = deck[finalPosition.row][finalPosition.col];
+        deck[7][3]->olcPos.x = 240.0f;
+        deck[7][3]->olcPos.y = 560.0f;
+
+        deck[initialPosition.row][initialPosition.col] = empty;
+        deck[finalPosition.row][finalPosition.col] = empty;
+        saveBoard();
+        if (bl)
+        {
+            deck[7][3]->setInitial(false);
+            deck[7][2]->setInitial(false);
+        }
+
+        return;
+    }
+    else if (deck[initialPosition.row][initialPosition.col]->showType() == "king" && !deck[initialPosition.row][initialPosition.col]->showColor() && deck[initialPosition.row][initialPosition.col]->isInitial() && finalPosition.row == 0 && finalPosition.col == 7)
+    {
+
+        deck[0][6] = deck[initialPosition.row][initialPosition.col];
+        deck[0][6]->olcPos.x = 480.0f;
+        deck[0][6]->olcPos.y = 0.0f;
+
+        deck[0][5] = deck[finalPosition.row][finalPosition.col];
+        deck[0][5]->olcPos.x = 400.0f;
+        deck[0][5]->olcPos.y = 0.0f;
+
+        deck[initialPosition.row][initialPosition.col] = empty;
+        deck[finalPosition.row][finalPosition.col] = empty;
+        saveBoard();
+        if (bl)
+        {
+            deck[0][6]->setInitial(false);
+            deck[0][5]->setInitial(false);
+        }
+
+        return;
+    }
+    else if (deck[initialPosition.row][initialPosition.col]->showType() == "king" && !deck[initialPosition.row][initialPosition.col]->showColor() && deck[initialPosition.row][initialPosition.col]->isInitial() && finalPosition.row == 0 && finalPosition.col == 0)
+    {
+
+        deck[0][2] = deck[initialPosition.row][initialPosition.col];
+        deck[0][2]->olcPos.x = 160.0f;
+        deck[0][2]->olcPos.y = 0.0f;
+
+        deck[0][3] = deck[finalPosition.row][finalPosition.col];
+        deck[0][3]->olcPos.x = 240.0f;
+        deck[0][3]->olcPos.y = 0.0f;
+
+        deck[initialPosition.row][initialPosition.col] = empty;
+        deck[finalPosition.row][finalPosition.col] = empty;
+        saveBoard();
+        if (bl)
+        {
+            deck[0][3]->setInitial(false);
+            deck[0][2]->setInitial(false);
+        }
 
         return;
     }
@@ -66,9 +140,11 @@ void ChessGame::toStep(Point initialPosition, Point finalPosition)
         deck[finalPosition.row - 1][finalPosition.col] = empty;
 
     deck[finalPosition.row][finalPosition.col] = deck[initialPosition.row][initialPosition.col];
-    deck[initialPosition.row][initialPosition.col]->setInitial(false);
     deck[initialPosition.row][initialPosition.col] = empty;
+
     saveBoard();
+    if (bl)
+        deck[finalPosition.row][finalPosition.col]->setInitial(false);
 }
 
 void ChessGame::saveBoard()
@@ -90,7 +166,6 @@ void ChessGame::saveBoard()
                     tempBoard[i][j] = new King;
 
                 *tempBoard[i][j] = *deck[i][j];
-                tempBoard[i][j]->setInitial(deck[i][j]->isInitial());
             }
             else
             {
@@ -99,6 +174,7 @@ void ChessGame::saveBoard()
         }
     }
     deckNotation.push_back(tempBoard);
+    deck = deckNotation[deckNotation.size() - 1];
 }
 void ChessGame::stepBack()
 {
@@ -142,12 +218,12 @@ void ChessGame::getPossibleCells(const Point initialPoint, std::vector<Point> &p
         {
             if (deck[points[i].row][points[i].col] == empty && elem->showColor() && initialPoint.row == 3)
             {
-                if ((deck[points[i].row + 1][points[i].col] != empty) && deck[points[i].row + 1][points[i].col]->showType() == "pawn" /* && Point{points[i].row - 1, points[i].col} == prevInitialPoint*/)
+                if ((deck[points[i].row + 1][points[i].col] != empty) && deck[points[i].row + 1][points[i].col]->showType() == "pawn" && Point{points[i].row - 1, points[i].col} == prevInitialPoint)
                     continue;
             }
             else if ((deck[points[i].row][points[i].col] == empty && !elem->showColor() && initialPoint.row == 4))
             {
-                if ((deck[points[i].row - 1][points[i].col] != empty) && deck[points[i].row - 1][points[i].col]->showType() == "pawn" /*&& Point{points[i].row + 1, points[i].col} == prevInitialPoint*/)
+                if ((deck[points[i].row - 1][points[i].col] != empty) && deck[points[i].row - 1][points[i].col]->showType() == "pawn" && Point{points[i].row + 1, points[i].col} == prevInitialPoint)
                     continue;
             }
 
@@ -180,32 +256,62 @@ void ChessGame::getPossibleCells(const Point initialPoint, std::vector<Point> &p
         }
     }
 }
-bool ChessGame::WhiteCastling()
+
+void ChessGame::blackCastling()
 {
+    bool rightWing = true;
+    bool leftWing = true;
+
     std::vector<Point> tempPoints;
-    if (deck[7][4]->showType() == "king" && deck[7][4]->isInitial() && deck[7][4]->showColor() && deck[7][7] != empty && deck[7][7]->showType() == "rook" && deck[7][7]->isInitial())
+    if (deck[0][4] != nullptr && deck[0][4]->showType() == "king" && deck[0][4]->isInitial() && !deck[0][4]->showColor() && deck[0][7] != empty && deck[0][7]->showType() == "rook" && deck[0][7]->isInitial())
     {
         for (int i = 0; i < 8; i++)
         {
             for (int j = 0; j < 8; j++)
             {
-                if (deck[i][j] != empty && !deck[i][j]->showColor())
+                if (deck[i][j] != empty && deck[i][j]->showColor())
                 {
+                    if ((deck[i][j]->showType() == "pawn" && i == 1 && j > 2))
+                    {
+                        rightWing = false;
+                    }
+                    if ((deck[i][j]->showType() == "pawn" && i == 1 && j < 6))
+                    {
+                        leftWing = false;
+                    }
+
                     getPossibleCells(Point{i, j}, tempPoints);
                     for (int k = 0; k < tempPoints.size(); k++)
                     {
-                        for (int f = 5; f < 7; f++)
+
+                        for (int f = 1; f < 4; f++)
                         {
-                            if (deck[7][f] != empty)
+                            if (deck[0][f] != empty)
                             {
-                                return false;
+                                leftWing = false;
                             }
                         }
+
+                        for (int f = 5; f < 7; f++)
+                        {
+                            if (deck[0][f] != empty)
+                            {
+                                rightWing = false;
+                            }
+                        }
+                        for (int f = 0; f < 5; f++)
+                        {
+                            if ((tempPoints[k].row == 0 && tempPoints[k].col == f && tempPoints[k].isAttack))
+                            {
+                                leftWing = false;
+                            }
+                        }
+
                         for (int f = 4; f < 8; f++)
                         {
-                            if ((deck[i][j]->showType() == "pawn" && i == 6 && j > 2) || (isWhiteCheck()) || (tempPoints[k].row == 7 && tempPoints[k].col == f && tempPoints[k].isAttack))
+                            if ((tempPoints[k].row == 0 && tempPoints[k].col == f && tempPoints[k].isAttack))
                             {
-                                return false;
+                                rightWing = false;
                             }
                         }
                     }
@@ -213,15 +319,91 @@ bool ChessGame::WhiteCastling()
                 }
             }
         }
-        points.push_back(Point{7, 7, false});
+        if (rightWing)
+            points.push_back(Point{0, 7, false});
+        if (leftWing)
+            points.push_back(Point{0, 0, false});
     }
+}
+void ChessGame::whiteCastling()
+{
+    bool rightWing = true;
+    bool leftWing = true;
+
+    std::vector<Point> tempPoints;
+    if (deck[7][4] != nullptr && deck[7][4]->showType() == "king" && deck[7][4]->isInitial() && deck[7][4]->showColor() && ((deck[7][7] != empty && deck[7][7]->showType() == "rook" && deck[7][7]->isInitial()) || (deck[7][0] != empty && deck[7][0]->showType() == "rook" && deck[7][0]->isInitial())))
+    {
+        for (int i = 0; i < 8; i++)
+        {
+            for (int j = 0; j < 8; j++)
+            {
+                if (deck[i][j] != empty && !deck[i][j]->showColor())
+                {
+                    if ((deck[i][j]->showType() == "pawn" && i == 6 && j > 2))
+                    {
+                        rightWing = false;
+                    }
+                    if ((deck[i][j]->showType() == "pawn" && i == 6 && j < 6))
+                    {
+                        leftWing = false;
+                    }
+
+                    getPossibleCells(Point{i, j}, tempPoints);
+                    for (int k = 0; k < tempPoints.size(); k++)
+                    {
+
+                        for (int f = 1; f < 4; f++)
+                        {
+                            if (deck[7][f] != empty)
+                            {
+                                leftWing = false;
+                            }
+                        }
+
+                        for (int f = 5; f < 7; f++)
+                        {
+                            if (deck[7][f] != empty)
+                            {
+                                rightWing = false;
+                            }
+                        }
+                        for (int f = 0; f < 5; f++)
+                        {
+                            if ((tempPoints[k].row == 7 && tempPoints[k].col == f && tempPoints[k].isAttack))
+                            {
+                                leftWing = false;
+                            }
+                        }
+
+                        for (int f = 4; f < 8; f++)
+                        {
+                            if ((tempPoints[k].row == 7 && tempPoints[k].col == f && tempPoints[k].isAttack))
+                            {
+                                rightWing = false;
+                            }
+                        }
+                    }
+                    clearPoints(tempPoints);
+                }
+            }
+        }
+    }
+    else
+    {
+        rightWing = false;
+        leftWing = false;
+    }
+    if (rightWing)
+        points.push_back(Point{7, 7, false});
+    if (leftWing)
+        points.push_back(Point{7, 0, false});
 }
 
 void ChessGame::checkAnalisysPoints()
 {
     for (int i = 0; i < points.size(); i++)
     {
-        toStep(initialPoint, points[i]);
+        toStep(initialPoint, points[i], false);
 
         if ((deck[points[i].row][points[i].col]->showColor() && isWhiteCheck()) || (!deck[points[i].row][points[i].col]->showColor() && isBlackCheck()))
         {
@@ -427,8 +609,10 @@ bool ChessGame::OnUserUpdate(float fElapsedTime)
 
                         checkAnalisysPoints();
 
-                       if (deck[i][j]->showType() == "king" && deck[i][j]->showColor())
-                            WhiteCastling();
+                        if (deck[i][j]->showType() == "king" && deck[i][j]->showColor())
+                            whiteCastling();
+                        else if (deck[i][j]->showType() == "king" && !deck[i][j]->showColor())
+                            blackCastling();
 
                         pSelected = &deck[i][j]->olcPos;
                         temp = deck[i][j]->olcPos;
@@ -448,7 +632,7 @@ bool ChessGame::OnUserUpdate(float fElapsedTime)
             {
                 *pSelected = {(float)points[k].col * 80.0f, (float)points[k].row * 80.0f};
 
-                toStep(initialPoint, points[k]);
+                toStep(initialPoint, points[k], true);
 
                 isFind = true;
                 turn = !turn;

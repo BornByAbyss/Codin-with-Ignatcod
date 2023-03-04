@@ -50,7 +50,7 @@ private:
     bool turn = true;
     bool isCheck = false;
     bool isFind = false;
-
+    Point prevInitialPoint;
     Point initialPoint;
     Point checkPosition;
 
@@ -76,7 +76,6 @@ private:
 
     King kingW, kingB;
 
-
     Figures *empty = nullptr;
 
     std::vector<std::vector<Figures *>> deck = {{&rookB1, empty, empty, &queenB, &kingB, empty, empty, &rookB2},
@@ -97,11 +96,12 @@ public:
     bool isWhiteCheck();
     bool isBlackCheck();
 
-    bool WhiteCastling();
+    void whiteCastling();
+    void blackCastling();
 
     void saveBoard();
 
-    void toStep(Point, Point);
+    void toStep(Point, Point, bool);
     void stepBack();
 
     void clearPoints(std::vector<Point> &);
