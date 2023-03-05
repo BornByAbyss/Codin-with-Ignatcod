@@ -18,7 +18,7 @@ ChessGame::ChessGame()
     bishopW2.set(true, "bishop", 400.0f, 560.0f);
 
     pawnW1.set(true, "pawn", 0.0f, 480.0);
-    pawnW2.set(true, "pawn", 240.0f, 160.0);
+    pawnW2.set(true, "pawn", 80.0f, 480.0);
     pawnW3.set(true, "pawn", 160.0f, 480.0);
     pawnW4.set(true, "pawn", 240.0f, 480.0);
     pawnW5.set(true, "pawn", 320.0f, 480.0);
@@ -480,6 +480,36 @@ bool ChessGame::isWhiteCheck()
     return false;
 }
 
+bool ChessGame::isCheckMate()
+{
+    std::vector<Point> PossibleSteps;
+    for (int i = 0; i < 8; i++)
+    {
+        for (int j = 0; j < 8; j++)
+        {
+            if (deck[i][j] != empty)
+            {
+                getPossibleCells(Point{i, j}, PossibleSteps);
+
+                for (int k = 0; k < PossibleSteps.size(); k++)
+                {
+                    toStep(Point{i, j}, PossibleSteps[k], false);
+
+                    if ((deck[PossibleSteps[k].row][PossibleSteps[k].col]->showColor() && isWhiteCheck()) || (!deck[PossibleSteps[k].row][PossibleSteps[k].col]->showColor() && isBlackCheck()))
+                    {
+                        PossibleSteps.erase(PossibleSteps.begin() + i);
+                        --i;
+                    }
+                    stepBack();
+                }
+                if (PossibleSteps.size() > 0)
+                    return false;
+            }
+        }
+    }
+    return true;
+}
+
 bool ChessGame::isCheckOnBoard()
 {
     return (isBlackCheck() || isWhiteCheck());
@@ -493,11 +523,11 @@ bool ChessGame::OnUserCreate()
 {
     deck = {{&rookB1, &knightB1, &bishopB1, &queenB, &kingB, &bishopB2, &knightB2, &rookB2},
             {&pawnB1, &pawnB2, &pawnB3, &pawnB4, &pawnB5, &pawnB6, &pawnB7, &pawnB8},
-            {empty, empty, empty, &pawnW2, empty, empty, empty, empty},
             {empty, empty, empty, empty, empty, empty, empty, empty},
             {empty, empty, empty, empty, empty, empty, empty, empty},
             {empty, empty, empty, empty, empty, empty, empty, empty},
-            {&pawnW1, empty, &pawnW3, &pawnW4, &pawnW5, &pawnW6, &pawnW7, &pawnW8},
+            {empty, empty, empty, empty, empty, empty, empty, empty},
+            {&pawnW1, &pawnW2, &pawnW3, &pawnW4, &pawnW5, &pawnW6, &pawnW7, &pawnW8},
             {&rookW1, &knightW1, &bishopW1, &queenW, &kingW, &bishopW2, &knightW2, &rookW2}};
     saveBoard();
 
@@ -559,7 +589,9 @@ bool ChessGame::OnUserUpdate(float fElapsedTime)
     {
         for (int j = 0; j < 8; j++)
         {
-            if (isSelectorOn && deck[i][j] != empty && deck[i][j]->olcPos.x == (*pSelected).x && deck[i][j]->olcPos.y >= 0.0f && deck[i][j]->olcPos.y <= 320.0f)
+            if (isSelectorWhiteOn && deck[i][j] != empty && deck[i][j]->olcPos.x == (*pSelected).x && deck[i][j]->olcPos.y >= 0.0f && deck[i][j]->olcPos.y <= 320.0f)
+                continue;
+            else if (isSelectorBlackOn && deck[i][j] != empty && deck[i][j]->olcPos.x == (*pSelected).x && deck[i][j]->olcPos.y >= 320.0f && deck[i][j]->olcPos.y <= 640.0f)
                 continue;
 
             if (pSelected == &(deck[i][j]->olcPos))
@@ -648,7 +680,7 @@ bool ChessGame::OnUserUpdate(float fElapsedTime)
     }
     olc::vf2d mouse = {float(GetMouseX()), float(GetMouseY())};
 
-    if (isSelectorOn)
+    if (isSelectorWhiteOn)
     {
         FillRect((*pSelected).x, 0.0f, 80.0f, 320.0f, olc::GREY);
         DrawDecal(olc::vf2d{(*pSelected).x, (*pSelected).y}, decQueenWhite, {(0.5f), (0.5f)});
@@ -660,18 +692,91 @@ bool ChessGame::OnUserUpdate(float fElapsedTime)
         {
             if (((mouse.x > (*pSelected).x) && (mouse.x < (*pSelected).x + 80.0f)) && ((mouse.y > (*pSelected).y) && (mouse.y < (*pSelected).y + 80.0f)))
             {
+                deck[((int)(*pSelected).y) / 80][((int)(*pSelected).x) / 80] = new Queen;
+                deck[((int)(*pSelected).y) / 80][((int)(*pSelected).x) / 80]->set(true, "queen", (*pSelected).x, (*pSelected).y);
+                isSelectorWhiteOn = false;
+                saveBoard();
             }
             else if (((mouse.x > (*pSelected).x) && (mouse.x < (*pSelected).x + 80.0f)) && ((mouse.y > (*pSelected).y + 80.0f) && (mouse.y < (*pSelected).y + 160.0f)))
             {
+                deck[((int)(*pSelected).y) / 80][((int)(*pSelected).x) / 80] = new Rook;
+                deck[((int)(*pSelected).y) / 80][((int)(*pSelected).x) / 80]->set(true, "rook", (*pSelected).x, (*pSelected).y);
+                isSelectorWhiteOn = false;
+                saveBoard();
             }
             else if (((mouse.x > (*pSelected).x) && (mouse.x < (*pSelected).x + 80.0f)) && ((mouse.y > (*pSelected).y + 160.0f) && (mouse.y < (*pSelected).y + 240.0f)))
             {
+                deck[((int)(*pSelected).y) / 80][((int)(*pSelected).x) / 80] = new Knight;
+                deck[((int)(*pSelected).y) / 80][((int)(*pSelected).x) / 80]->set(true, "knight", (*pSelected).x, (*pSelected).y);
+                isSelectorWhiteOn = false;
+                saveBoard();
             }
             else if (((mouse.x > (*pSelected).x) && (mouse.x < (*pSelected).x + 80.0f)) && ((mouse.y > (*pSelected).y + 240.0f) && (mouse.y < (*pSelected).y + 320.0f)))
             {
+                deck[((int)(*pSelected).y) / 80][((int)(*pSelected).x) / 80] = new Bishop;
+                deck[((int)(*pSelected).y) / 80][((int)(*pSelected).x) / 80]->set(true, "bishop", (*pSelected).x, (*pSelected).y);
+                isSelectorWhiteOn = false;
+                saveBoard();
+            }
+
+            else
+            {
+                return true;
             }
         }
-        return true;
+        else
+        {
+            return true;
+        }
+    }
+    else if (isSelectorBlackOn)
+    {
+        FillRect((*pSelected).x, 320.0f, 80.0f, 320.0f, olc::GREY);
+        DrawDecal(olc::vf2d{(*pSelected).x, (*pSelected).y}, decQueenBlack, {(0.5f), (0.5f)});
+        DrawDecal(olc::vf2d{(*pSelected).x, (*pSelected).y - 80.0f}, decRookBlack);
+        DrawDecal(olc::vf2d{(*pSelected).x, (*pSelected).y - 160.0f}, decKnightBlack);
+        DrawDecal(olc::vf2d{(*pSelected).x, (*pSelected).y - 240.0f}, decBishopBlack);
+
+        if (GetMouse(0).bPressed)
+        {
+            if (((mouse.x > (*pSelected).x) && (mouse.x < (*pSelected).x + 80.0f)) && ((mouse.y < (*pSelected).y + 80.0f) && (mouse.y > (*pSelected).y)))
+            {
+                deck[((int)(*pSelected).y) / 80][((int)(*pSelected).x) / 80] = new Queen;
+                deck[((int)(*pSelected).y) / 80][((int)(*pSelected).x) / 80]->set(false, "queen", (*pSelected).x, (*pSelected).y);
+                isSelectorBlackOn = false;
+                saveBoard();
+            }
+            else if (((mouse.x > (*pSelected).x) && (mouse.x < (*pSelected).x + 80.0f)) && ((mouse.y < (*pSelected).y) && (mouse.y > (*pSelected).y - 80.0f)))
+            {
+                deck[((int)(*pSelected).y) / 80][((int)(*pSelected).x) / 80] = new Rook;
+                deck[((int)(*pSelected).y) / 80][((int)(*pSelected).x) / 80]->set(false, "rook", (*pSelected).x, (*pSelected).y);
+                isSelectorBlackOn = false;
+                saveBoard();
+            }
+            else if (((mouse.x > (*pSelected).x) && (mouse.x < (*pSelected).x + 80.0f)) && ((mouse.y < (*pSelected).y - 80.0f) && (mouse.y > (*pSelected).y - 160.0f)))
+            {
+                deck[((int)(*pSelected).y) / 80][((int)(*pSelected).x) / 80] = new Knight;
+                deck[((int)(*pSelected).y) / 80][((int)(*pSelected).x) / 80]->set(false, "knight", (*pSelected).x, (*pSelected).y);
+                isSelectorBlackOn = false;
+                saveBoard();
+            }
+            else if (((mouse.x > (*pSelected).x) && (mouse.x < (*pSelected).x + 80.0f)) && ((mouse.y < (*pSelected).y - 160.0f) && (mouse.y > (*pSelected).y - 240.0f)))
+            {
+                deck[((int)(*pSelected).y) / 80][((int)(*pSelected).x) / 80] = new Bishop;
+                deck[((int)(*pSelected).y) / 80][((int)(*pSelected).x) / 80]->set(false, "bishop", (*pSelected).x, (*pSelected).y);
+                isSelectorBlackOn = false;
+                saveBoard();
+            }
+
+            else
+            {
+                return true;
+            }
+        }
+        else
+        {
+            return true;
+        }
     }
 
     if (GetMouse(0).bPressed)
@@ -715,16 +820,23 @@ bool ChessGame::OnUserUpdate(float fElapsedTime)
             {
                 *pSelected = {(float)points[k].col * 80.0f, (float)points[k].row * 80.0f};
 
-                toStep(initialPoint, points[k], true);
+                turn = !turn;
 
-                if (deck[points[k].row][points[k].col]->showType() == "pawn" && deck[points[k].row][points[k].col]->showColor() && points[k].row == 0)
+                if (deck[initialPoint.row][initialPoint.col]->showType() == "pawn" && deck[initialPoint.row][initialPoint.col]->showColor() && points[k].row == 0)
                 {
-                    isSelectorOn = true;
+                    deck[initialPoint.row][initialPoint.col] = empty;
+                    isSelectorWhiteOn = true;
+                    return true;
+                }
+                else if (deck[initialPoint.row][initialPoint.col]->showType() == "pawn" && !deck[initialPoint.row][initialPoint.col]->showColor() && points[k].row == 7)
+                {
+                    deck[initialPoint.row][initialPoint.col] = empty;
+                    isSelectorBlackOn = true;
                     return true;
                 }
 
+                toStep(initialPoint, points[k], true);
                 isFind = true;
-                turn = !turn;
                 break;
             }
         }
@@ -757,7 +869,8 @@ bool ChessGame::OnUserUpdate(float fElapsedTime)
         {
             turn = !turn;
             stepBack();
-            isSelectorOn = false;
+            isSelectorWhiteOn = false;
+            isSelectorBlackOn = false;
         }
     }
 

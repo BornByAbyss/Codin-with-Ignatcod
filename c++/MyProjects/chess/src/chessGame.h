@@ -62,7 +62,9 @@ private:
     bool turn = true;
     bool isCheck = false;
     bool isFind = false;
-    bool isSelectorOn = false;
+    bool isSelectorWhiteOn = false;
+    bool isSelectorBlackOn = false;
+
     Point prevInitialPoint;
     Point initialPoint;
     Point checkPosition;
@@ -107,6 +109,8 @@ public:
     bool isCheckOnBoard();
     bool isWhiteCheck();
     bool isBlackCheck();
+
+    bool isCheckMate();
 
     void selector(const olc::vf2d);
 
