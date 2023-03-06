@@ -64,6 +64,7 @@ private:
     bool isFind = false;
     bool isSelectorWhiteOn = false;
     bool isSelectorBlackOn = false;
+    bool isPlayChess = false;
 
     int x = -1;
 
@@ -113,6 +114,7 @@ public:
 
     bool isCheckMate();
 
+    bool CreateMenu();
     void whiteCastling();
     void blackCastling();
 

@@ -1,5 +1,3 @@
-
-
 #include <iostream>
 #include <iomanip>
 #include <vector>
@@ -7,6 +5,8 @@
 #include "figures.h"
 #include "chessGame.h"
 #include "olcPixelGameEngine.h"
+#include <thread>
+#include <chrono>
 
 ChessGame::ChessGame()
 {
@@ -51,6 +51,34 @@ ChessGame::ChessGame()
     knightB2.set(false, "knight", 480.0f, 0.0f);
     knightW1.set(true, "knight", 80.0f, 560.0f);
     knightW2.set(true, "knight", 480.0f, 560.0f);
+}
+
+bool ChessGame::CreateMenu()
+{
+    Clear(olc::Pixel(0, 0, 0, 100));
+
+    FillRect(olc::vf2d{156.0f, 276.0f}, olc::vf2d{328.0f, 88.0f}, olc::BLACK);
+    FillRect(olc::vf2d{160.0f, 280.0f}, olc::vf2d{320.0f, 80.0f}, olc::CYAN);
+    DrawString(olc::vf2d{270.0f, 515.0f}, "Press ESC to exit game", olc::BLACK, 2);
+
+    olc::vf2d mouse = {float(GetMouseX()), float(GetMouseY())};
+
+    if ((mouse.x >= 160.0f && mouse.x <= 480.0f) && (mouse.y >= 280.0f && mouse.y <= 360.0f))
+    {
+        FillRect(olc::vf2d{160.0f, 280.0f}, olc::vf2d{320.0f, 80.0f}, olc::Pixel(0, 255, 255, 200));
+    }
+
+    DrawString(olc::vf2d{200.0f, 315.0f}, "PLAY MOTHERFAKA", olc::BLACK, 2);
+
+    if (GetMouse(0).bPressed)
+    {
+        if ((mouse.x >= 160.0f && mouse.x <= 480.0f) && (mouse.y >= 280.0f && mouse.y <= 360.0f))
+        {
+            isPlayChess = true;
+            return true;
+        }
+    }
+    return false;
 }
 
 void ChessGame::toStep(Point initialPosition, Point finalPosition)
@@ -572,6 +600,12 @@ bool ChessGame::OnUserCreate()
 }
 bool ChessGame::OnUserUpdate(float fElapsedTime)
 {
+    if (!isPlayChess)
+        if (!CreateMenu())
+        {
+            return true;
+        }
+
     Clear(olc::BLANK);
 
     if (x != -1 || GetKey(olc::E).bPressed)
@@ -888,6 +922,38 @@ bool ChessGame::OnUserUpdate(float fElapsedTime)
             isSelectorWhiteOn = false;
             isSelectorBlackOn = false;
         }
+    }
+
+    if (GetKey(olc::ESCAPE).bPressed)
+    {
+        if (deckNotation.size() > 0)
+        {
+            turn = true;
+            deck = deckNotation[0];
+            while (deckNotation.size() > 1)
+            {
+                deckNotation.pop_back();
+            }
+            prevInitialPoints.clear();
+        }
+
+        for (int i = 0; i < 8; i++)
+        {
+            for (int j = 0; j < 8; j++)
+            {
+                if (deck[i][j] != nullptr)
+                {
+                    deck[i][j]->olcPos.x = (float)j * 80.0f;
+                    deck[i][j]->olcPos.y = (float)i * 80.0f;
+                }
+            }
+        }
+        isPlayChess = false;
+    }
+
+    if (isCheckMate())
+    {
+        std::cout << "checjmate";
     }
 
     return true;

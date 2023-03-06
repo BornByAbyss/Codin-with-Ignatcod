@@ -6,13 +6,11 @@
 
 int main()
 {
-    Menu menu;
+    ChessGame game;
 
-    while (true)
+    if (game.Construct(640, 640, 1, 1)) // 80 - size of square
     {
-        menu.Start();
-        if (menu.Construct(640, 640, 1, 1)) // 80 - size of square
-        
+        game.Start();
     }
 
     return 0;
