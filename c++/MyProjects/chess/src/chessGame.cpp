@@ -53,10 +53,9 @@ ChessGame::ChessGame()
     knightW2.set(true, "knight", 480.0f, 560.0f);
 }
 
-void ChessGame::toStep(Point initialPosition, Point finalPosition, bool bl)
+void ChessGame::toStep(Point initialPosition, Point finalPosition)
 {
-    if (bl)
-        prevInitialPoint = initialPosition;
+    prevInitialPoints.push_back(initialPosition);
     if (deck[initialPosition.row][initialPosition.col]->showType() == "king" && deck[initialPosition.row][initialPosition.col]->showColor() && deck[initialPosition.row][initialPosition.col]->isInitial() && finalPosition.row == 7 && finalPosition.col == 7)
     {
 
@@ -71,11 +70,8 @@ void ChessGame::toStep(Point initialPosition, Point finalPosition, bool bl)
         deck[initialPosition.row][initialPosition.col] = empty;
         deck[finalPosition.row][finalPosition.col] = empty;
         saveBoard();
-        if (bl)
-        {
-            deck[7][6]->setInitial(false);
-            deck[7][5]->setInitial(false);
-        }
+        deck[7][6]->setInitial(false);
+        deck[7][5]->setInitial(false);
 
         return;
     }
@@ -92,11 +88,9 @@ void ChessGame::toStep(Point initialPosition, Point finalPosition, bool bl)
         deck[initialPosition.row][initialPosition.col] = empty;
         deck[finalPosition.row][finalPosition.col] = empty;
         saveBoard();
-        if (bl)
-        {
-            deck[7][3]->setInitial(false);
-            deck[7][2]->setInitial(false);
-        }
+
+        deck[7][3]->setInitial(false);
+        deck[7][2]->setInitial(false);
 
         return;
     }
@@ -114,11 +108,9 @@ void ChessGame::toStep(Point initialPosition, Point finalPosition, bool bl)
         deck[initialPosition.row][initialPosition.col] = empty;
         deck[finalPosition.row][finalPosition.col] = empty;
         saveBoard();
-        if (bl)
-        {
-            deck[0][6]->setInitial(false);
-            deck[0][5]->setInitial(false);
-        }
+
+        deck[0][6]->setInitial(false);
+        deck[0][5]->setInitial(false);
 
         return;
     }
@@ -136,11 +128,9 @@ void ChessGame::toStep(Point initialPosition, Point finalPosition, bool bl)
         deck[initialPosition.row][initialPosition.col] = empty;
         deck[finalPosition.row][finalPosition.col] = empty;
         saveBoard();
-        if (bl)
-        {
-            deck[0][3]->setInitial(false);
-            deck[0][2]->setInitial(false);
-        }
+
+        deck[0][3]->setInitial(false);
+        deck[0][2]->setInitial(false);
 
         return;
     }
@@ -151,11 +141,12 @@ void ChessGame::toStep(Point initialPosition, Point finalPosition, bool bl)
         deck[finalPosition.row - 1][finalPosition.col] = empty;
 
     deck[finalPosition.row][finalPosition.col] = deck[initialPosition.row][initialPosition.col];
+    deck[finalPosition.row][finalPosition.col]->olcPos.y = (float)finalPosition.row * 80.0f;
+    deck[finalPosition.row][finalPosition.col]->olcPos.x = (float)finalPosition.col * 80.0f;
     deck[initialPosition.row][initialPosition.col] = empty;
 
     saveBoard();
-    if (bl)
-        deck[finalPosition.row][finalPosition.col]->setInitial(false);
+    deck[finalPosition.row][finalPosition.col]->setInitial(false);
 }
 
 void ChessGame::saveBoard()
@@ -181,6 +172,7 @@ void ChessGame::saveBoard()
                     tempBoard[i][j] = new Bishop;
 
                 *tempBoard[i][j] = *deck[i][j];
+                tempBoard[i][j]->olcPos = deck[i][j]->olcPos;
             }
             else
             {
@@ -216,6 +208,7 @@ void ChessGame::stepBack()
     }
 
     deckNotation.pop_back();
+    prevInitialPoints.pop_back();
 }
 
 void ChessGame::getPossibleCells(const Point initialPoint, std::vector<Point> &points)
@@ -233,12 +226,12 @@ void ChessGame::getPossibleCells(const Point initialPoint, std::vector<Point> &p
         {
             if (deck[points[i].row][points[i].col] == empty && elem->showColor() && initialPoint.row == 3)
             {
-                if ((deck[points[i].row + 1][points[i].col] != empty) && deck[points[i].row + 1][points[i].col]->showType() == "pawn" && Point{points[i].row - 1, points[i].col} == prevInitialPoint)
+                if ((deck[points[i].row + 1][points[i].col] != empty) && deck[points[i].row + 1][points[i].col]->showType() == "pawn" && prevInitialPoints.size() > 0 && Point{points[i].row - 1, points[i].col} == prevInitialPoints.back())
                     continue;
             }
             else if ((deck[points[i].row][points[i].col] == empty && !elem->showColor() && initialPoint.row == 4))
             {
-                if ((deck[points[i].row - 1][points[i].col] != empty) && deck[points[i].row - 1][points[i].col]->showType() == "pawn" && Point{points[i].row + 1, points[i].col} == prevInitialPoint)
+                if ((deck[points[i].row - 1][points[i].col] != empty) && deck[points[i].row - 1][points[i].col]->showType() == "pawn" && prevInitialPoints.size() > 0 && Point{points[i].row + 1, points[i].col} == prevInitialPoints.back())
                     continue;
             }
 
@@ -418,7 +411,7 @@ void ChessGame::checkAnalisysPoints()
 {
     for (int i = 0; i < points.size(); i++)
     {
-        toStep(initialPoint, points[i], false);
+        toStep(initialPoint, points[i]);
 
         if ((deck[points[i].row][points[i].col]->showColor() && isWhiteCheck()) || (!deck[points[i].row][points[i].col]->showColor() && isBlackCheck()))
         {
@@ -493,7 +486,7 @@ bool ChessGame::isCheckMate()
 
                 for (int k = 0; k < PossibleSteps.size(); k++)
                 {
-                    toStep(Point{i, j}, PossibleSteps[k], false);
+                    toStep(Point{i, j}, PossibleSteps[k]);
 
                     if ((deck[PossibleSteps[k].row][PossibleSteps[k].col]->showColor() && isWhiteCheck()) || (!deck[PossibleSteps[k].row][PossibleSteps[k].col]->showColor() && isBlackCheck()))
                     {
@@ -513,10 +506,6 @@ bool ChessGame::isCheckMate()
 bool ChessGame::isCheckOnBoard()
 {
     return (isBlackCheck() || isWhiteCheck());
-}
-
-void ChessGame::selector(const olc::vf2d posSelector)
-{
 }
 
 bool ChessGame::OnUserCreate()
@@ -585,6 +574,34 @@ bool ChessGame::OnUserUpdate(float fElapsedTime)
 {
     Clear(olc::BLANK);
 
+    if (x != -1 || GetKey(olc::E).bPressed)
+    {
+        std::cout << "Enter index: ";
+        std::cin >> x;
+
+        if ((x > deckNotation.size() - 1) || (x < 0))
+        {
+            std::cout << "vy daun";
+            deck = deckNotation[deckNotation.size() - 1];
+        }
+        else
+        {
+
+            deck = deckNotation[x];
+
+            for (int i = 0; i < 8; i++)
+            {
+                for (int j = 0; j < 8; j++)
+                {
+                    if (deck[i][j] != nullptr)
+                    {
+                        deck[i][j]->olcPos.x = (float)j * 80.0f;
+                        deck[i][j]->olcPos.y = (float)i * 80.0f;
+                    }
+                }
+            }
+        }
+    }
     for (int i = 0; i < 8; i++)
     {
         for (int j = 0; j < 8; j++)
@@ -811,7 +828,6 @@ bool ChessGame::OnUserUpdate(float fElapsedTime)
             }
         }
     }
-
     if (GetMouse(0).bReleased && pSelected != nullptr)
     {
         for (int k = 0; k < points.size(); k++)
@@ -835,7 +851,7 @@ bool ChessGame::OnUserUpdate(float fElapsedTime)
                     return true;
                 }
 
-                toStep(initialPoint, points[k], true);
+                toStep(initialPoint, points[k]);
                 isFind = true;
                 break;
             }

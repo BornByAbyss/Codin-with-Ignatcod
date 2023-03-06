@@ -38,8 +38,8 @@ private:
     olc::Sprite *sprBishopBlack = nullptr;
     olc::Sprite *sprBishopWhite = nullptr;
 
-     olc::Decal *decBishopBlack = nullptr;
-     olc::Decal *decBishopWhite = nullptr;
+    olc::Decal *decBishopBlack = nullptr;
+    olc::Decal *decBishopWhite = nullptr;
 
     olc::Decal *decKnightBlack = nullptr;
     olc::Decal *decKnightWhite = nullptr;
@@ -65,7 +65,8 @@ private:
     bool isSelectorWhiteOn = false;
     bool isSelectorBlackOn = false;
 
-    Point prevInitialPoint;
+    int x = -1;
+
     Point initialPoint;
     Point checkPosition;
 
@@ -86,11 +87,11 @@ private:
 
     Queen queenW, queenB;
 
+    std::vector<Point> prevInitialPoints;
 
     Bishop bishopW1, bishopW2, bishopB1, bishopB2;
 
     Knight knightW1, knightW2, knightB1, knightB2;
-
 
     Rook rookW1, rookW2;
     Rook rookB1, rookB2;
@@ -112,14 +113,12 @@ public:
 
     bool isCheckMate();
 
-    void selector(const olc::vf2d);
-
     void whiteCastling();
     void blackCastling();
 
     void saveBoard();
 
-    void toStep(Point, Point, bool);
+    void toStep(Point, Point);
     void stepBack();
 
     void clearPoints(std::vector<Point> &);
