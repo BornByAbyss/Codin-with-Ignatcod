@@ -112,7 +112,7 @@ public:
     bool isWhiteCheck();
     bool isBlackCheck();
 
-    bool isCheckMate();
+    bool isCheckMate(bool);
 
     bool CreateMenu();
     void whiteCastling();
